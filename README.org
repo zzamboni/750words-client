@@ -6,11 +6,29 @@ A simple client for posting text to your [[https://750words.com/][750words.com]]
 
 * Installation
 
+** Local installation
+
 You need the following libraries and components installed:
 
 - [[https://selenium-python.readthedocs.io/][Selenium]] Python bindings.
 - [[https://www.google.com/chrome/][Google Chrome]] is used to automate the connections.
 - [[https://chromedriver.chromium.org/][ChromeDriver]] so that Selenium can connect to Chrome - make sure you install the version that corresponds to the Chrome version you have installed.
+
+** Docker image
+
+If you have Docker, you can build an image that runs =750words-client.py= as follows:
+
+#+begin_src bash
+docker build  --tag 750words-client .
+#+end_src
+
+And then run it as you would the script as follows:
+
+#+begin_src bash
+docker run -i 750words-client --help
+#+end_src
+
+Note: you need to use the =-i= option to =docker run= to allow the container to read the text from standard input.
 
 * Usage
 
@@ -21,8 +39,8 @@ You need the following libraries and components installed:
 #+RESULTS:
 #+begin_example
 usage: 750words-client.py [-h] [--limit LIMIT] [--only-if-needed] [--replace]
-                          [--count] [--no-headless] [--quiet] [--user USER]
-                          [--password PASSWORD]
+                          [--count] [--text] [--no-headless] [--quiet]
+                          [--user USER] [--password PASSWORD]
 
 Update 750words.com from the command line. Input is read from standard input.
 
@@ -34,6 +52,7 @@ optional arguments:
                        to add at the end.
   --count              Don't upload anything, only print the current word
                        count.
+  --text               Don't upload anything, only print the current text.
   --no-headless        Disable headless mode (opens the Chrome app window).
   --quiet              Don't print progress messages.
   --user USER          User name to use for 750words. Can be provided through
