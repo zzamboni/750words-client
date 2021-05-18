@@ -45,10 +45,12 @@ import sys
 import time
 
 text = ""
+text_count = 0
 if not (args.count or args.text):
     for line in sys.stdin:
         text = text + line
-    eprint("Got text: "+text)
+    text_count = len(text.split())
+    eprint("Got text: " + text + (" (%d words)" % text_count))
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
