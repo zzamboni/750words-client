@@ -4,7 +4,15 @@
 
 A simple client for posting text to your [[https://750words.com/][750words.com]] account. Can also be used to query your current word count.
 
-Usage:
+* Installation
+
+You need the following libraries and components installed:
+
+- [[https://selenium-python.readthedocs.io/][Selenium]] Python bindings.
+- [[https://www.google.com/chrome/][Google Chrome]] is used to automate the connections.
+- [[https://chromedriver.chromium.org/][ChromeDriver]] so that Selenium can connect to Chrome - make sure you install the version that corresponds to the Chrome version you have installed.
+
+* Usage
 
 #+begin_src bash :results output :exports both
 ./750words-client.py --help
