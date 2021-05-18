@@ -1,0 +1,35 @@
+#+TITLE: 750words command-line client
+#+author: Diego Zamboni
+#+email: diego@zzamboni.org
+
+A simple client for posting text to your [[https://750words.com/][750words.com]] account. Can also be used to query your current word count.
+
+Usage:
+
+#+begin_src bash :results output
+./750words-client.py --help
+#+end_src
+
+#+RESULTS:
+#+begin_example
+usage: 750words-client.py [-h] [--limit LIMIT] [--only-if-needed] [--replace]
+                          [--count] [--no-headless] [--quiet] [--user USER]
+                          [--password PASSWORD]
+
+Update 750words.com from the command line. Input is read from standard input.
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --limit LIMIT        Specify minimum words needed. Default: 750
+  --only-if-needed     Only add text if current word count is below the limit.
+  --replace            Replace any current text with the new one, default is
+                       to add at the end.
+  --count              Don't upload anything, only print the current word
+                       count.
+  --no-headless        Disable headless mode (opens the Chrome app window).
+  --quiet              Don't print progress messages.
+  --user USER          User name to use for 750words. Can be provided through
+                       the USER_750WORDS environment variable.
+  --password PASSWORD  Password to use for authentication. Can be provided
+                       through the PASS_750WORDS environment variable.
+#+end_example
