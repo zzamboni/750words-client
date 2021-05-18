@@ -18,6 +18,9 @@ parser.add_argument("--replace",
 parser.add_argument("--count",
                     help="Don't upload anything, only print the current word count.",
                     action="store_true")
+parser.add_argument("--text",
+                    help="Don't upload anything, only print the current text.",
+                    action="store_true")
 parser.add_argument("--no-headless",
                     help="Disable headless mode (opens the Chrome app window).",
                     action="store_true")
@@ -42,7 +45,7 @@ import sys
 import time
 
 text = ""
-if not args.count:
+if not (args.count or args.text):
     for line in sys.stdin:
         text = text + line
     eprint("Got text: "+text)
@@ -55,7 +58,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-# Taken from https://www.intricatecloud.io/2019/05/running-webdriverio-tests-using-headless-chrome-inside-a-container/
 opts = Options()
 opts.add_argument("--window-size=1200,800")
 if not args.no_headless:
@@ -67,14 +69,12 @@ opts.add_argument("--disable-setuid-sandbox")
 opts.add_argument("--disable-dev-shm-usage")
 opts.add_argument("--disable-infobars")
 
-# opts.add_argument("user-agent=" + ua_list[4])
 driver = webdriver.Chrome(options=opts)
 
 eprint("Connecting to 750words.com...")
 driver.get('https://750words.com/auth')
 
 eprint("Authenticating...")
-# login_form = driver.find_element_by_id('signin_form')
 login_form = WebDriverWait(driver, 10).until(
     EC.presence_of_element_located((By.ID, 'signin_form'))
 )
@@ -99,7 +99,9 @@ if text_field:
     current_word_count = len(current_text.split())
     if args.count:
         print("Current word count: "+str(current_word_count))
-    else:
+    if args.text:
+        print(current_text)
+    if not (args.count or args.text):
         enter_text = True
         if (not args.replace) and args.only_if_needed and (current_word_count >= args.limit):
             eprint("Word count is already enough, not entering text.")
