@@ -6,7 +6,7 @@ A simple client for posting text to your [[https://750words.com/][750words.com]]
 
 Usage:
 
-#+begin_src bash :results output
+#+begin_src bash :results output :exports both
 ./750words-client.py --help
 #+end_src
 
