@@ -186,6 +186,9 @@ if text_field:
             if warning_dialog_text:
                 driver.find_element_by_xpath('//div[@class="ui-dialog-buttonset"]/button[1]').click()
             time.sleep(1)
+            new_text = text_field.get_attribute("value")
+            new_word_count = len(new_text.split())
+            eprint("New word count: %d" % new_word_count)
             # Wait until the "Saved!" floating popup appears.
             # WebDriverWait(driver, 5).until(
             #     EC.presence_of_element_located((By.ID, 'achtung-overlay'))
