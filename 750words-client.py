@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
-word_limit = 750
+min_words = 750
+max_words = 4995
 
 import argparse
 import os
 
 parser = argparse.ArgumentParser(description="Update 750words.com from the command line. Input is read from standard input.")
-parser.add_argument("--limit",
-                    help=("Specify minimum words needed. Default: %d" % word_limit),
-                    default=word_limit,
+parser.add_argument("--min",
+                    help=("Minimum number of words needed. Default: %d" % min_words),
+                    default=min_words,
                     type=int)
+parser.add_argument("--max",
+                    help=("Maximum total number of words allowed. Default: %d" % max_words),
+                    default=max_words)
 parser.add_argument("--only-if-needed",
                     help="Only add text if current word count is below the limit.",
                     action="store_true")
@@ -105,13 +109,20 @@ if text_field:
         print(current_text)
     if not (args.count or args.text):
         enter_text = True
-        if (not args.replace) and args.only_if_needed and (current_word_count >= args.limit):
+        if (not args.replace) and args.only_if_needed and (current_word_count >= args.min):
             eprint("Word count is already enough, not entering text.")
             enter_text = False
         if enter_text:
             if args.replace:
                 eprint("Clearing existing text...")
                 text_field.clear()
+                current_text = ""
+                current_word_count = 0
+            if (current_word_count+text_count) > args.max:
+                new_word_count = args.max - current_word_count
+                eprint("Trimming new text to %d words to keep total below %d" % (new_word_count, args.max))
+                # This is imperfect - line breaks are replaced with spaces
+                text = ' '.join(text.split()[:new_word_count])
             eprint("Entering new text...")
             text_field.send_keys(text)
             eprint("Saving...")
@@ -121,7 +132,7 @@ if text_field:
             warning_dialog_text = driver.find_element_by_xpath('//div[@id="losing_words"]').text
             if warning_dialog_text:
                 driver.find_element_by_xpath('//div[@class="ui-dialog-buttonset"]/button[1]').click()
-            time.sleep(1)
+            time.sleep(2)
             new_text = text_field.get_attribute("value")
             new_word_count = len(new_text.split())
             eprint("New word count: %d" % new_word_count)
