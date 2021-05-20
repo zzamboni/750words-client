@@ -16,19 +16,25 @@ You need the following libraries and components installed:
 
 ** Docker image
 
-If you have Docker, you can build an image that runs =750words-client.py= as follows:
+If you have Docker, you can pull an image that runs =750words-client.py= as follows:
 
 #+begin_src bash
-docker build  --tag 750words-client .
+docker pull zzamboni/750words-client
 #+end_src
 
 And then run it as you would the script as follows:
 
 #+begin_src bash
-docker run -i 750words-client --help
+docker run -i zzamboni/750words-client --help
 #+end_src
 
 Note: you need to use the =-i= option to =docker run= to allow the container to read the text from standard input.
+
+If you want to build the image yourself, you can do it as follows:
+
+#+begin_src bash
+docker build  --tag 750words-client .
+#+end_src
 
 * Usage
 
