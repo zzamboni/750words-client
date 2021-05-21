@@ -2,39 +2,49 @@
 #+author: Diego Zamboni
 #+email: diego@zzamboni.org
 
-A simple client for posting text to your [[https://750words.com/][750words.com]] account. Can also be used to query your current word count.
+A simple client for posting text to your [[https://750words.com/][750words.com]] account. Can also be used to query your current word count or the current text.
+
+You can see its annotated source code in the [[https://github.com/zzamboni/750words-client/blob/main/750words-client.org][750words-client.org]] file, but the file you run is [[https://github.com/zzamboni/750words-client/blob/main/750words-client.py][750words-client.py]].
 
 * Installation
 
 ** Docker image
 
-You can pull the image that runs =750words-client.py= as follows:
+You can use =750words-client.py= from its Docker image as follows (the image will be downloaded from [[https://hub.docker.com/r/zzamboni/750words-client][Docker Hub]] the first time you use it):
 
 #+begin_src bash
-docker pull zzamboni/750words-client
+docker run zzamboni/750words-client --help
 #+end_src
 
-And then use it as follows:
+Note: you need to pass the =-i= option to =docker run= if you want to read the input from standard input, e.g.:
 
 #+begin_src bash
-docker run -i zzamboni/750words-client --help
+cat file.txt | docker run -i zzamboni/750words-client
 #+end_src
 
-Note: you need to use the =-i= option to =docker run= to allow the container to read the text from standard input.
-
-If you want to build the image yourself, you can do it as follows ([[https://github.com/zzamboni/750words-client/blob/main/Dockerfile][Dockerfile]]):
+If you want to build the image yourself, you can do it as follows from a checkout of its [[https://github.com/zzamboni/750words-client][git repository]]:
 
 #+begin_src bash
-docker build  --tag 750words-client .
+docker build --tag 750words-client .
 #+end_src
+
+[[[https://github.com/zzamboni/750words-client/blob/main/Dockerfile][Dockerfile]]]
 
 ** Local installation
 
+Clone this repository:
+
+#+begin_src bash
+git clone https://github.com/zzamboni/750words-client.git
+#+end_src
+
 You need the following libraries and components installed:
 
-- [[https://selenium-python.readthedocs.io/][Selenium]] Python bindings.
+- [[https://selenium-python.readthedocs.io/][Selenium]] Python bindings (run =pip install -r requirements.txt=)
 - [[https://www.google.com/chrome/][Google Chrome]] is used to automate the connections.
 - [[https://chromedriver.chromium.org/][ChromeDriver]] so that Selenium can connect to Chrome - make sure you install the version that corresponds to the Chrome version you have installed.
+
+You can then copy =750words.py= to somewhere in your =$PATH= to use it.
 
 * Usage
 
