@@ -6,6 +6,28 @@ A simple client for posting text to your [[https://750words.com/][750words.com]]
 
 * Installation
 
+** Docker image
+
+You can pull the image that runs =750words-client.py= as follows:
+
+#+begin_src bash
+docker pull zzamboni/750words-client
+#+end_src
+
+And then use it as follows:
+
+#+begin_src bash
+docker run -i zzamboni/750words-client --help
+#+end_src
+
+Note: you need to use the =-i= option to =docker run= to allow the container to read the text from standard input.
+
+If you want to build the image yourself, you can do it as follows ([[file:Dockerfile][Dockerfile]]):
+
+#+begin_src bash
+docker build  --tag 750words-client .
+#+end_src
+
 ** Local installation
 
 You need the following libraries and components installed:
@@ -14,45 +36,24 @@ You need the following libraries and components installed:
 - [[https://www.google.com/chrome/][Google Chrome]] is used to automate the connections.
 - [[https://chromedriver.chromium.org/][ChromeDriver]] so that Selenium can connect to Chrome - make sure you install the version that corresponds to the Chrome version you have installed.
 
-** Docker image
-
-If you have Docker, you can pull an image that runs =750words-client.py= as follows:
-
-#+begin_src bash
-docker pull zzamboni/750words-client
-#+end_src
-
-And then run it as you would the script as follows:
-
-#+begin_src bash
-docker run -i zzamboni/750words-client --help
-#+end_src
-
-Note: you need to use the =-i= option to =docker run= to allow the container to read the text from standard input.
-
-If you want to build the image yourself, you can do it as follows:
-
-#+begin_src bash
-docker build  --tag 750words-client .
-#+end_src
-
 * Usage
 
 #+begin_src bash :results output :exports both
-./750words-client.py --help
+750words-client.py --help
 #+end_src
 
 #+RESULTS:
 #+begin_example
-usage: 750words-client.py [-h] [--limit LIMIT] [--only-if-needed] [--replace]
-                          [--count] [--text] [--no-headless] [--quiet]
-                          [--user USER] [--password PASSWORD]
+usage: 750words-client.py [-h] [--min MIN] [--max MAX] [--only-if-needed]
+                          [--replace] [--count] [--text] [--no-headless]
+                          [--quiet] [--user USER] [--password PASSWORD]
 
 Update 750words.com from the command line. Input is read from standard input.
 
 optional arguments:
   -h, --help           show this help message and exit
-  --limit LIMIT        Specify minimum words needed. Default: 750
+  --min MIN            Minimum number of words needed. Default: 750
+  --max MAX            Maximum total number of words allowed. Default: 4995
   --only-if-needed     Only add text if current word count is below the limit.
   --replace            Replace any current text with the new one, default is
                        to add at the end.
