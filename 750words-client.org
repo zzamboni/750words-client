@@ -36,26 +36,33 @@ max_words = 4995
 #+begin_src python
 import argparse
 import os
+import sys
+import time
 
-parser = argparse.ArgumentParser(description="Update 750words.com from the command line. Input is read from standard input.")
+parser = argparse.ArgumentParser(description="Interact with 750words.com from the command line.")
+parser.add_argument('FILE',
+                    help='Input files for text to add. Default is to read from standard input.',
+                    type=argparse.FileType('r'),
+                    nargs='*',
+                    default=[sys.stdin],)
 parser.add_argument("--min",
-                    help=("Minimum number of words needed. Default: %d" % min_words),
+                    help=("Minimum number of words needed. Default: %d." % min_words),
                     default=min_words,
                     type=int)
 parser.add_argument("--max",
-                    help=("Maximum total number of words allowed. Default: %d" % max_words),
+                    help=("Maximum total number of words allowed. Default: %d." % max_words),
                     default=max_words)
 parser.add_argument("--only-if-needed",
-                    help="Only add text if current word count is below the limit.",
+                    help="Only add text if current word count is below MIN.",
                     action="store_true")
 parser.add_argument("--replace",
                     help="Replace any current text with the new one, default is to add at the end.",
                     action="store_true")
 parser.add_argument("--count",
-                    help="Don't upload anything, only print the current word count.",
+                    help="Don't upload text, only print the current word count.",
                     action="store_true")
 parser.add_argument("--text",
-                    help="Don't upload anything, only print the current text.",
+                    help="Don't upload text, only print the current text.",
                     action="store_true")
 parser.add_argument("--no-headless",
                     help="Disable headless mode (opens the Chrome app window).",
@@ -88,14 +95,11 @@ def eprint(*eargs, **ekwargs):
    :CUSTOM_ID: read-text-from-stdin
    :END:
 #+begin_src python
-import sys
-import time
-
 text = ""
 text_count = 0
 if not (args.count or args.text):
-    for line in sys.stdin:
-        text = text + line
+    for infile in args.FILE:
+        text = text + infile.read() + "\n"
     text_count = len(text.split())
     eprint("Got text: " + text + (" (%d words)" % text_count))
 #+end_src

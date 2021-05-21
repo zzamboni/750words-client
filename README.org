@@ -47,19 +47,23 @@ You need the following libraries and components installed:
 usage: 750words-client.py [-h] [--min MIN] [--max MAX] [--only-if-needed]
                           [--replace] [--count] [--text] [--no-headless]
                           [--quiet] [--user USER] [--password PASSWORD]
+                          [FILE ...]
 
-Update 750words.com from the command line. Input is read from standard input.
+Interact with 750words.com from the command line.
+
+positional arguments:
+  FILE                 Input files for text to add. Default is to read from
+                       standard input.
 
 optional arguments:
   -h, --help           show this help message and exit
-  --min MIN            Minimum number of words needed. Default: 750
-  --max MAX            Maximum total number of words allowed. Default: 4995
-  --only-if-needed     Only add text if current word count is below the limit.
+  --min MIN            Minimum number of words needed. Default: 750.
+  --max MAX            Maximum total number of words allowed. Default: 4995.
+  --only-if-needed     Only add text if current word count is below MIN.
   --replace            Replace any current text with the new one, default is
                        to add at the end.
-  --count              Don't upload anything, only print the current word
-                       count.
-  --text               Don't upload anything, only print the current text.
+  --count              Don't upload text, only print the current word count.
+  --text               Don't upload text, only print the current text.
   --no-headless        Disable headless mode (opens the Chrome app window).
   --quiet              Don't print progress messages.
   --user USER          User name to use for 750words. Can be provided through
