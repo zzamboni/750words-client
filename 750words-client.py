@@ -4,7 +4,7 @@ def eprint(*eargs, **ekwargs):
         print(*eargs, file=sys.stderr, **ekwargs)
 
 min_words = 750
-max_words = 4995
+max_words = 5000
 
 import argparse
 import os
@@ -46,8 +46,8 @@ parser.add_argument("--quiet",
                     action="store_true")
 args = parser.parse_args()
 
-username = os.getenv('USER_750WORDS') or ""
-password = os.getenv('PASS_750WORDS') or ""
+username = os.getenv('USER_750WORDS') or None
+password = os.getenv('PASS_750WORDS') or None
 
 if not(username and password):
     eprint("Please set the USER_750WORDS/PASS_750WORDS environment variables")
@@ -89,6 +89,7 @@ eprint("Authenticating...")
 login_form = WebDriverWait(driver, 10).until(
     EC.presence_of_element_located((By.ID, 'signin_form'))
 )
+
 if login_form:
     user_field = driver.find_element_by_id('person_email_address')
     password_field = driver.find_element_by_id('person_password')
@@ -105,46 +106,71 @@ eprint("Finding current text entry...")
 text_field = WebDriverWait(driver, 10).until(
     EC.presence_of_element_located((By.ID, 'entry_body'))
 )
+
 if text_field:
+    # Get current text and word count
     current_text = text_field.get_attribute("value")
     current_word_count = len(current_text.split())
+
+    # If --count is given, print the word count
     if args.count:
         print("Current word count: "+str(current_word_count))
+
+    # If --text is given, print the text
     if args.text:
         print(current_text)
+
+    # Otherwise, prepare to enter text
     if not (args.count or args.text):
         enter_text = True
+        # If --only-if-needed is used without --replace, we need to check if we
+        # already have enough words
         if (not args.replace) and args.only_if_needed and (current_word_count >= args.min):
             eprint("Word count is already enough, not entering text.")
             enter_text = False
+
+        # Finally! We get to entering new text
         if enter_text:
+            # Clear the field first if --replace was used
             if args.replace:
                 eprint("Clearing existing text...")
                 text_field.clear()
                 current_text = ""
                 current_word_count = 0
+
+            # Check if the end text would have more words than the maximum
+            # allowed, and in that case trim it down. The trimming is imperfect,
+            # line breaks are replaced with spaces.
             if (current_word_count+text_count) > args.max:
                 new_word_count = args.max - current_word_count
                 eprint("Trimming new text to %d words to keep total below %d" % (new_word_count, args.max))
-                # This is imperfect - line breaks are replaced with spaces
                 text = ' '.join(text.split()[:new_word_count])
+
+            # Enter the new text in the text field
             eprint("Entering new text...")
             text_field.send_keys(text)
+
+            # Send Cmd-s to force save
             eprint("Saving...")
             ActionChains(driver).key_down(Keys.COMMAND).send_keys('s').key_up(Keys.COMMAND).perform()
-            # If the warning dialog about losing words appears, click "Save
-            # anyway"
+
+            # 750words issues a warning dialog if the word count gets reduced by
+            # a lot when saving the text. This might happen with --replace, so
+            # we catch it. If the dialog appears, we click "Save anyway". Note
+            # that the <div id="losing_words"> element is always there, but
+            # normally empty, so we need to check if it contains any text
+            # instead of its existence.
             warning_dialog_text = driver.find_element_by_xpath('//div[@id="losing_words"]').text
             if warning_dialog_text:
                 driver.find_element_by_xpath('//div[@class="ui-dialog-buttonset"]/button[1]').click()
+
+            # Short wait to ensure text is saved correctly
             time.sleep(2)
+
+            # Get new text and word count
             new_text = text_field.get_attribute("value")
             new_word_count = len(new_text.split())
             eprint("New word count: %d" % new_word_count)
-            # Wait until the "Saved!" floating popup appears.
-            # WebDriverWait(driver, 5).until(
-            #     EC.presence_of_element_located((By.ID, 'achtung-overlay'))
-            # )
 else:
     raise BaseException("Could not find text entry form in page.")
 

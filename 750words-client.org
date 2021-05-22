@@ -8,20 +8,45 @@
 
 Allow programmatically posting text to 750words.com. Reads text from standard input, and adds it to your daily text. If the =--only-if-needed= flag is given, the text is only added if the current word count is less than 750 words. If the =--replace= flag is given, then any existing text is replaced instead of added to.
 
-** Install dependencies
+** Dependencies and Dockerfile
    :PROPERTIES:
    :CUSTOM_ID: install-dependencies
    :END:
 
-Necessary libraries and software. This is commented out by default, kept here just as reference.
+Necessary libraries and software.
 
-#+begin_src python :tangle no
-# Install a pip package in the current Python install
-import sys
-# !{sys.executable} -m pip install selenium
+- [[https://selenium-python.readthedocs.io/][Selenium]] Python bindings (run =pip install -r requirements.txt=). This is the contents of =requirements.txt=:
+  #+begin_src text :tangle requirements.txt
+selenium
+  #+end_src
+- [[https://www.google.com/chrome/][Google Chrome]] is used to automate the connections.
+- [[https://chromedriver.chromium.org/][ChromeDriver]] so that Selenium can connect to Chrome - make sure you install the version that corresponds to the Chrome version you have installed.
+
+The Dockerfile installs all the necessary requirements:
+#+begin_src dockerfile :tangle Dockerfile
+## -*- dockerfile-image-name: "zzamboni/750words-client" -*-
+
+FROM python:3
+MAINTAINER Diego Zamboni <diego@zzamboni.org>
+
+WORKDIR /app
+
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-driver \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . .
+
+ENTRYPOINT [ "python", "/app/750words-client.py" ]
 #+end_src
-#+begin_src python :tangle no
-# !brew install google-chrome chromedriver
+
+The Docker image allows the program to be used directly from the container by passing the corresponding arguments, e.g.:
+#+begin_src bash
+docker run zzamboni/750words-client --help
 #+end_src
 
 ** Utility functions
@@ -40,7 +65,7 @@ We configure the minimum and maximum word thresholds. The maximum may change if 
 
 #+begin_src python
 min_words = 750
-max_words = 4995
+max_words = 5000
 #+end_src
 
 #+begin_src python
@@ -88,18 +113,21 @@ args = parser.parse_args()
 Verify that the username and password have been provided through the corresponding environmnt variables.
 
 #+begin_src python
-username = os.getenv('USER_750WORDS') or ""
-password = os.getenv('PASS_750WORDS') or ""
+username = os.getenv('USER_750WORDS') or None
+password = os.getenv('PASS_750WORDS') or None
 
 if not(username and password):
     eprint("Please set the USER_750WORDS/PASS_750WORDS environment variables")
     sys.exit(1)
 #+end_src
 
-** Read text from stdin
+** Read new text (if needed)
    :PROPERTIES:
    :CUSTOM_ID: read-text-from-stdin
    :END:
+
+Text is read from the provided files (default STDIN) only if =--count= and =--text= are not given.
+
 #+begin_src python
 text = ""
 text_count = 0
@@ -114,6 +142,9 @@ if not (args.count or args.text):
    :PROPERTIES:
    :CUSTOM_ID: start-up-chrome-using-selenium-and-connect-to-750words.com
    :END:
+
+Load libraries
+
 #+begin_src python
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -123,6 +154,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 #+end_src
+
+Start Chrome using the necessary options. These options ensure that [[https://www.intricatecloud.io/2019/05/running-webdriverio-tests-using-headless-chrome-inside-a-container/][Chrome runs well inside a Docker container]].
 
 #+begin_src python
 opts = Options()
@@ -139,19 +172,30 @@ opts.add_argument("--disable-infobars")
 driver = webdriver.Chrome(options=opts)
 #+end_src
 
+Now load the website's authentication screen.
+
 #+begin_src python
 eprint("Connecting to 750words.com...")
 driver.get('https://750words.com/auth')
 #+end_src
+
 ** Authenticate
    :PROPERTIES:
    :CUSTOM_ID: authenticate
    :END:
+
+Find the authentication form inside the page.
+
 #+begin_src python
 eprint("Authenticating...")
 login_form = WebDriverWait(driver, 10).until(
     EC.presence_of_element_located((By.ID, 'signin_form'))
 )
+#+end_src
+
+If found, find the username/password fields and send the correct information, else signal an error.
+
+#+begin_src python
 if login_form:
     user_field = driver.find_element_by_id('person_email_address')
     password_field = driver.find_element_by_id('person_password')
@@ -162,10 +206,13 @@ else:
     raise BaseException("Could not find login form in https://750words.com/auth")
 #+end_src
 
-** Enter text
+** Do the work
    :PROPERTIES:
    :CUSTOM_ID: enter-text
    :END:
+
+Finally, we can perform the requested actions according to the options. By now we should be in the 750words.com main "Today" page, which contains a big text field for entering today's words. So the first thing we do is find that field.
+
 #+begin_src python
 eprint("Finding current text entry...")
 # We use WebDriverWait to wait (with a limit) until the page is loaded and the
@@ -174,46 +221,73 @@ eprint("Finding current text entry...")
 text_field = WebDriverWait(driver, 10).until(
     EC.presence_of_element_located((By.ID, 'entry_body'))
 )
+#+end_src
+
+#+begin_src python
 if text_field:
+    # Get current text and word count
     current_text = text_field.get_attribute("value")
     current_word_count = len(current_text.split())
+
+    # If --count is given, print the word count
     if args.count:
         print("Current word count: "+str(current_word_count))
+
+    # If --text is given, print the text
     if args.text:
         print(current_text)
+
+    # Otherwise, prepare to enter text
     if not (args.count or args.text):
         enter_text = True
+        # If --only-if-needed is used without --replace, we need to check if we
+        # already have enough words
         if (not args.replace) and args.only_if_needed and (current_word_count >= args.min):
             eprint("Word count is already enough, not entering text.")
             enter_text = False
+
+        # Finally! We get to entering new text
         if enter_text:
+            # Clear the field first if --replace was used
             if args.replace:
                 eprint("Clearing existing text...")
                 text_field.clear()
                 current_text = ""
                 current_word_count = 0
+
+            # Check if the end text would have more words than the maximum
+            # allowed, and in that case trim it down. The trimming is imperfect,
+            # line breaks are replaced with spaces.
             if (current_word_count+text_count) > args.max:
                 new_word_count = args.max - current_word_count
                 eprint("Trimming new text to %d words to keep total below %d" % (new_word_count, args.max))
-                # This is imperfect - line breaks are replaced with spaces
                 text = ' '.join(text.split()[:new_word_count])
+
+            # Enter the new text in the text field
             eprint("Entering new text...")
             text_field.send_keys(text)
+
+            # Send Cmd-s to force save
             eprint("Saving...")
             ActionChains(driver).key_down(Keys.COMMAND).send_keys('s').key_up(Keys.COMMAND).perform()
-            # If the warning dialog about losing words appears, click "Save
-            # anyway"
+
+            # 750words issues a warning dialog if the word count gets reduced by
+            # a lot when saving the text. This might happen with --replace, so
+            # we catch it. If the dialog appears, we click "Save anyway". Note
+            # that the <div id="losing_words"> element is always there, but
+            # normally empty, so we need to check if it contains any text
+            # instead of its existence.
             warning_dialog_text = driver.find_element_by_xpath('//div[@id="losing_words"]').text
             if warning_dialog_text:
                 driver.find_element_by_xpath('//div[@class="ui-dialog-buttonset"]/button[1]').click()
+
+            # Short wait to ensure text is saved correctly
             time.sleep(2)
+
+            # Get new text and word count
             new_text = text_field.get_attribute("value")
             new_word_count = len(new_text.split())
             eprint("New word count: %d" % new_word_count)
-            # Wait until the "Saved!" floating popup appears.
-            # WebDriverWait(driver, 5).until(
-            #     EC.presence_of_element_located((By.ID, 'achtung-overlay'))
-            # )
 else:
     raise BaseException("Could not find text entry form in page.")
 #+end_src
