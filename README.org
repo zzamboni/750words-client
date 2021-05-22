@@ -1,4 +1,4 @@
-# Created 2021-05-22 Sat 18:58
+# Created 2021-05-22 Sat 23:18
 #+TITLE: 750words command-line client
 #+AUTHOR: Diego Zamboni
 #+export_file_name: README.org
@@ -52,7 +52,6 @@ You can then copy =750words.py= to somewhere in your =$PATH= to use it.
 750words-client.py --help
 #+end_src
 
-#+results: 
 #+begin_example
 usage: 750words-client.py [-h] [--min MIN] [--max MAX] [--only-if-needed]
                           [--replace] [--count] [--text] [--no-headless]
