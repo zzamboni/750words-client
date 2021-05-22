@@ -165,6 +165,7 @@ import argparse
 import os
 import sys
 import time
+import re
 
 parser = argparse.ArgumentParser(description="Interact with 750words.com from the command line.",
                                  epilog=("Your 750words.com credentials must be stored in the "
