@@ -129,9 +129,9 @@ if text_field:
             eprint("Word count is already enough, not entering text.")
             enter_text = False
 
-        # Finally! We get to entering new text
+        # Finally we get to entering new text
         if enter_text:
-            # Clear the field first if --replace was used
+            # First clear the field if --replace was used
             if args.replace:
                 eprint("Clearing existing text...")
                 text_field.clear()
@@ -139,12 +139,11 @@ if text_field:
                 current_word_count = 0
 
             # Check if the end text would have more words than the maximum
-            # allowed, and in that case trim it down. The trimming is imperfect,
-            # line breaks are replaced with spaces.
-            if (current_word_count+text_count) > args.max:
+            # allowed, and in that case trim it down.
+            if (current_word_count + text_count) > args.max:
                 new_word_count = args.max - current_word_count
                 eprint("Trimming new text to %d words to keep total below %d" % (new_word_count, args.max))
-                text = ' '.join(text.split()[:new_word_count])
+                text = ''.join(re.findall(r'\S+\s*', text)[:new_word_count])
 
             # Enter the new text in the text field
             eprint("Entering new text...")
