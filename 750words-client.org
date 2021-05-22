@@ -1,14 +1,24 @@
 #+property: header-args:python :tangle (concat (file-name-sans-extension (buffer-file-name)) ".py") :shebang "#!/usr/bin/env python3"
 #+property: header-args :mkdirp yes :comments no
 
-* 750words client
-  :PROPERTIES:
-  :CUSTOM_ID: words-client
-  :END:
+#+title: 750words client
+#+author: Diego Zamboni
+#+email: diego@zzamboni.org
 
 Allow programmatically posting text to 750words.com. Reads text from standard input, and adds it to your daily text. If the =--only-if-needed= flag is given, the text is only added if the current word count is less than 750 words. If the =--replace= flag is given, then any existing text is replaced instead of added to.
 
-** Dependencies and Dockerfile
+* Table of Contents :TOC:
+- [[#dependencies-and-dockerfile][Dependencies and Dockerfile]]
+- [[#code][Code]]
+  - [[#utility-functions][Utility functions]]
+  - [[#configuration-and-command-line-arguments][Configuration and command line arguments]]
+  - [[#read-new-text-if-needed][Read new text (if needed)]]
+  - [[#start-up-chrome-using-selenium-and-connect-to-750wordscom][Start up Chrome using Selenium and connect to 750words.com]]
+  - [[#authenticate][Authenticate]]
+  - [[#do-the-work][Do the work]]
+  - [[#finish][Finish]]
+
+* Dependencies and Dockerfile
    :PROPERTIES:
    :CUSTOM_ID: install-dependencies
    :END:
@@ -49,6 +59,7 @@ The Docker image allows the program to be used directly from the container by pa
 docker run zzamboni/750words-client --help
 #+end_src
 
+* Code
 ** Utility functions
 
 Print a progress/status message to stderr.
