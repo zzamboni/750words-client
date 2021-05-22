@@ -68,7 +68,7 @@ positional arguments:
 optional arguments:
   -h, --help        show this help message and exit
   --min MIN         Minimum number of words needed. Default: 750.
-  --max MAX         Maximum total number of words allowed. Default: 4995.
+  --max MAX         Maximum total number of words allowed. Default: 5000.
   --only-if-needed  Only add text if current word count is below MIN.
   --replace         Replace any current text with the new one, default is to
                     add at the end.
