@@ -5,20 +5,103 @@
 #+author: Diego Zamboni
 #+email: diego@zzamboni.org
 
-Allow programmatically posting text to 750words.com. Reads text from standard input, and adds it to your daily text. If the =--only-if-needed= flag is given, the text is only added if the current word count is less than 750 words. If the =--replace= flag is given, then any existing text is replaced instead of added to.
+A command-line client for 750words.com.
 
 * Table of Contents :TOC:
-- [[#dependencies-and-dockerfile][Dependencies and Dockerfile]]
-- [[#code][Code]]
-  - [[#utility-functions][Utility functions]]
-  - [[#configuration-and-command-line-arguments][Configuration and command line arguments]]
-  - [[#read-new-text-if-needed][Read new text (if needed)]]
-  - [[#start-up-chrome-using-selenium-and-connect-to-750wordscom][Start up Chrome using Selenium and connect to 750words.com]]
-  - [[#authenticate][Authenticate]]
-  - [[#do-the-work][Do the work]]
-  - [[#finish][Finish]]
+- [[#installation][Installation]]
+  - [[#docker-image][Docker image]]
+  - [[#local-installation][Local installation]]
+- [[#use][Use]]
+- [[#implementation][Implementation]]
+  - [[#dependencies-and-dockerfile][Dependencies and Dockerfile]]
+  - [[#code][Code]]
 
-* Dependencies and Dockerfile
+* Installation
+:PROPERTIES:
+:CUSTOM_ID: installation
+:END:
+
+** Docker image
+
+[[[https://hub.docker.com/r/zzamboni/750words-client][750words-client on Docker Hub]]][[[https://github.com/zzamboni/750words-client/blob/main/Dockerfile][Dockerfile]]]
+
+You can use =750words-client.py= from its Docker image as follows (the image will be downloaded from [[https://hub.docker.com/r/zzamboni/750words-client][Docker Hub]] the first time you use it):
+
+#+begin_src bash
+docker run zzamboni/750words-client --help
+#+end_src
+
+Note: you need to pass the =-i= option to =docker run= if you want to read the input from standard input, e.g.:
+
+#+begin_src bash
+cat file.txt | docker run -i zzamboni/750words-client
+#+end_src
+
+If you want to build the image yourself, you can do it as follows from a checkout of its [[https://github.com/zzamboni/750words-client][git repository]]:
+
+#+begin_src bash
+docker build --tag 750words-client .
+#+end_src
+
+** Local installation
+
+Clone this repository:
+
+#+begin_src bash
+git clone https://github.com/zzamboni/750words-client.git
+#+end_src
+
+You need the following libraries and components installed:
+
+- [[https://selenium-python.readthedocs.io/][Selenium]] Python bindings (run =pip install -r requirements.txt=)
+- [[https://www.google.com/chrome/][Google Chrome]] is used to automate the connections.
+- [[https://chromedriver.chromium.org/][ChromeDriver]] so that Selenium can connect to Chrome - make sure you install the version that corresponds to the Chrome version you have installed.
+
+You can then copy =750words.py= to somewhere in your =$PATH= to use it.
+
+* Use
+:PROPERTIES:
+:CUSTOM_ID: usage
+:END:
+
+#+begin_src bash :results output :exports both
+750words-client.py --help
+#+end_src
+
+#+RESULTS:
+#+begin_example
+usage: 750words-client.py [-h] [--min MIN] [--max MAX] [--only-if-needed]
+                          [--replace] [--count] [--text] [--no-headless]
+                          [--quiet]
+                          [FILE ...]
+
+Interact with 750words.com from the command line.
+
+positional arguments:
+  FILE              Input files for text to add. Default is to read from
+                    standard input.
+
+optional arguments:
+  -h, --help        show this help message and exit
+  --min MIN         Minimum number of words needed. Default: 750.
+  --max MAX         Maximum total number of words allowed. Default: 5000.
+  --only-if-needed  Only add text if current word count is below MIN.
+  --replace         Replace any current text with the new one, default is to
+                    add at the end.
+  --count           Don't upload text, only print the current word count.
+  --text            Don't upload text, only print the current text.
+  --no-headless     Disable headless mode (opens the Chrome app window).
+  --quiet           Don't print progress messages.
+
+Your 750words.com credentials must be stored in the USER_750WORDS and
+PASS_750WORDS environment variables.
+#+end_example
+
+* Implementation
+:PROPERTIES:
+:CUSTOM_ID: implementation
+:END:
+** Dependencies and Dockerfile
    :PROPERTIES:
    :CUSTOM_ID: install-dependencies
    :END:
@@ -57,8 +140,8 @@ COPY 750words-client.py .
 ENTRYPOINT [ "python", "/app/750words-client.py" ]
 #+end_src
 
-* Code
-** Utility functions
+** Code
+*** Utility functions
 
 Print a progress/status message to stderr.
 
@@ -68,7 +151,7 @@ def eprint(*eargs, **ekwargs):
         print(*eargs, file=sys.stderr, **ekwargs)
 #+end_src
 
-** Configuration and command line arguments
+*** Configuration and command line arguments
 
 We configure the minimum and maximum word thresholds. The maximum may change if you have a paid 750words.com account, which allows you to write more than 5000 words.
 
@@ -130,7 +213,7 @@ if not(username and password):
     sys.exit(1)
 #+end_src
 
-** Read new text (if needed)
+*** Read new text (if needed)
    :PROPERTIES:
    :CUSTOM_ID: read-text-from-stdin
    :END:
@@ -147,7 +230,7 @@ if not (args.count or args.text):
     eprint("Got text: " + text + (" (%d words)" % text_count))
 #+end_src
 
-** Start up Chrome using Selenium and connect to 750words.com
+*** Start up Chrome using Selenium and connect to 750words.com
    :PROPERTIES:
    :CUSTOM_ID: start-up-chrome-using-selenium-and-connect-to-750words.com
    :END:
@@ -188,7 +271,7 @@ eprint("Connecting to 750words.com...")
 driver.get('https://750words.com/auth')
 #+end_src
 
-** Authenticate
+*** Authenticate
    :PROPERTIES:
    :CUSTOM_ID: authenticate
    :END:
@@ -215,7 +298,7 @@ else:
     raise BaseException("Could not find login form in https://750words.com/auth")
 #+end_src
 
-** Do the work
+*** Do the work
    :PROPERTIES:
    :CUSTOM_ID: enter-text
    :END:
@@ -302,7 +385,7 @@ else:
     raise BaseException("Could not find text entry form in page.")
 #+end_src
 
-** Finish
+*** Finish
    :PROPERTIES:
    :CUSTOM_ID: finish
    :END:

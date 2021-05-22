@@ -1,0 +1,13 @@
+#+EXPORT_FILE_NAME: README.org
+
+#+TITLE: 750words command-line client
+#+author: Diego Zamboni
+#+email: diego@zzamboni.org
+
+A simple client for posting text to your [[https://750words.com/][750words.com]] account. Can also be used to query your current word count or the current text.
+
+You can see its annotated source code in the [[https://github.com/zzamboni/750words-client/blob/main/750words-client.org][750words-client.org]] file, but the file you run is [[https://github.com/zzamboni/750words-client/blob/main/750words-client.py][750words-client.py]].
+
+#+include: "./750words-client.org::#installation"
+
+#+include: "./750words-client.org::#usage"

@@ -1,6 +1,7 @@
+# Created 2021-05-22 Sat 18:58
 #+TITLE: 750words command-line client
-#+author: Diego Zamboni
-#+email: diego@zzamboni.org
+#+AUTHOR: Diego Zamboni
+#+export_file_name: README.org
 
 A simple client for posting text to your [[https://750words.com/][750words.com]] account. Can also be used to query your current word count or the current text.
 
@@ -46,13 +47,12 @@ You need the following libraries and components installed:
 
 You can then copy =750words.py= to somewhere in your =$PATH= to use it.
 
-* Usage
-
-#+begin_src bash :results output :exports both
+* Use
+#+begin_src bash
 750words-client.py --help
 #+end_src
 
-#+RESULTS:
+#+results: 
 #+begin_example
 usage: 750words-client.py [-h] [--min MIN] [--max MAX] [--only-if-needed]
                           [--replace] [--count] [--text] [--no-headless]
