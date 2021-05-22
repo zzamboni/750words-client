@@ -28,3 +28,4 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ${{ github.repository }}
+          short-description: ${{ github.event.repository.description }}
