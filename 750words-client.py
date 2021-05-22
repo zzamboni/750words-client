@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+def eprint(*eargs, **ekwargs):
+    if not args.quiet:
+        print(*eargs, file=sys.stderr, **ekwargs)
+
 min_words = 750
 max_words = 4995
 
@@ -7,7 +11,9 @@ import os
 import sys
 import time
 
-parser = argparse.ArgumentParser(description="Interact with 750words.com from the command line.")
+parser = argparse.ArgumentParser(description="Interact with 750words.com from the command line.",
+                                 epilog=("Your 750words.com credentials must be stored in the "
+                                         "USER_750WORDS and PASS_750WORDS environment variables."))
 parser.add_argument('FILE',
                     help='Input files for text to add. Default is to read from standard input.',
                     type=argparse.FileType('r'),
@@ -38,19 +44,14 @@ parser.add_argument("--no-headless",
 parser.add_argument("--quiet",
                     help="Don't print progress messages.",
                     action="store_true")
-parser.add_argument("--user",
-                    help="User name to use for 750words. Can be provided through the USER_750WORDS environment variable.",
-                    type=str,
-                    default=(os.getenv('USER_750WORDS') or ""))
-parser.add_argument("--password",
-                    help="Password to use for authentication. Can be provided through the PASS_750WORDS environment variable.",
-                    type=str,
-                    default=(os.getenv('PASS_750WORDS') or ""))
 args = parser.parse_args()
 
-def eprint(*eargs, **ekwargs):
-    if not args.quiet:
-        print(*eargs, file=sys.stderr, **ekwargs)
+username = os.getenv('USER_750WORDS') or ""
+password = os.getenv('PASS_750WORDS') or ""
+
+if not(username and password):
+    eprint("Please set the USER_750WORDS/PASS_750WORDS environment variables")
+    sys.exit(1)
 
 text = ""
 text_count = 0
@@ -89,10 +90,10 @@ login_form = WebDriverWait(driver, 10).until(
     EC.presence_of_element_located((By.ID, 'signin_form'))
 )
 if login_form:
-    user = driver.find_element_by_id('person_email_address')
-    password = driver.find_element_by_id('person_password')
-    user.send_keys(args.user)
-    password.send_keys(args.password)
+    user_field = driver.find_element_by_id('person_email_address')
+    password_field = driver.find_element_by_id('person_password')
+    user_field.send_keys(username)
+    password_field.send_keys(password)
     login_form.submit()
 else:
     raise BaseException("Could not find login form in https://750words.com/auth")
