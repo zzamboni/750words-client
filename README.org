@@ -10,6 +10,8 @@ You can see its annotated source code in the [[https://github.com/zzamboni/750wo
 
 ** Docker image
 
+[[[https://hub.docker.com/r/zzamboni/750words-client][750words-client on Docker Hub]]][[[https://github.com/zzamboni/750words-client/blob/main/Dockerfile][Dockerfile]]]
+
 You can use =750words-client.py= from its Docker image as follows (the image will be downloaded from [[https://hub.docker.com/r/zzamboni/750words-client][Docker Hub]] the first time you use it):
 
 #+begin_src bash
@@ -27,8 +29,6 @@ If you want to build the image yourself, you can do it as follows from a checkou
 #+begin_src bash
 docker build --tag 750words-client .
 #+end_src
-
-[[[https://github.com/zzamboni/750words-client/blob/main/Dockerfile][Dockerfile]]]
 
 ** Local installation
 
