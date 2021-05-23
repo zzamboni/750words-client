@@ -1,14 +1,14 @@
+A simple client for posting text to your [750words.com](https://750words.com/) account. Can also be used to query your current word count or the current text.
+
+You can see its annotated source code in the [750words-client.org](https://github.com/zzamboni/750words-client/blob/main/750words-client.org) file, but the file you run is [750words-client.py](https://github.com/zzamboni/750words-client/blob/main/750words-client.py).
+
 
 # Table of Contents
 
 1.  [Installation](#installation)
-    1.  [Docker image](#orgc145abe)
-    2.  [Local installation](#org21e0e6e)
+    1.  [Docker image](#org6edb51f)
+    2.  [Local installation](#org0256e9f)
 2.  [Use](#usage)
-
-A simple client for posting text to your [750words.com](https://750words.com/) account. Can also be used to query your current word count or the current text.
-
-You can see its annotated source code in the [750words-client.org](https://github.com/zzamboni/750words-client/blob/main/750words-client.org) file, but the file you run is [750words-client.py](https://github.com/zzamboni/750words-client/blob/main/750words-client.py).
 
 
 <a id="installation"></a>
@@ -16,7 +16,7 @@ You can see its annotated source code in the [750words-client.org](https://githu
 # Installation
 
 
-<a id="orgc145abe"></a>
+<a id="org6edb51f"></a>
 
 ## Docker image
 
@@ -35,7 +35,7 @@ If you want to build the image yourself, you can do it as follows from a checkou
     docker build --tag 750words-client .
 
 
-<a id="org21e0e6e"></a>
+<a id="org0256e9f"></a>
 
 ## Local installation
 
