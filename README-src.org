@@ -1,4 +1,4 @@
-#+EXPORT_FILE_NAME: README.org
+#+EXPORT_FILE_NAME: README.md
 
 #+TITLE: 750words command-line client
 #+author: Diego Zamboni
