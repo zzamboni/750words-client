@@ -16,10 +16,6 @@ jobs:
         with:
           push: true
           tags: ${{ github.repository }}
-      - name: Convert README.org to Markdown
-        uses: docker://pandoc/core:2.9
-        with:
-          args: "-f org -t markdown --output=README.md README.org"
       - name: Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v2
         with:
