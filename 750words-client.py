@@ -94,8 +94,10 @@ login_form = WebDriverWait(driver, 10).until(
 if login_form:
     user_field = driver.find_element_by_id('person_email_address')
     password_field = driver.find_element_by_id('person_password')
-    user_field.send_keys(username)
-    password_field.send_keys(password)
+    # user_field.send_keys(username)
+    driver.execute_script('arguments[0].value=arguments[1];', user_field, username)
+    # password_field.send_keys(password)
+    driver.execute_script('arguments[0].value=arguments[1];', password_field, password)
     login_form.submit()
 else:
     raise BaseException("Could not find login form in https://750words.com/auth")
@@ -138,7 +140,6 @@ if text_field:
             # First clear the field if --replace was used
             if args.replace:
                 eprint("Clearing existing text...")
-                text_field.clear()
                 current_text = ""
                 current_word_count = 0
 
@@ -151,7 +152,8 @@ if text_field:
 
             # Enter the new text in the text field
             eprint("Entering new text...")
-            text_field.send_keys(text)
+            # text_field.send_keys(text)
+            driver.execute_script('arguments[0].value=arguments[1];', text_field, current_text + text)
 
             # Send Cmd-s to force save
             eprint("Saving...")
