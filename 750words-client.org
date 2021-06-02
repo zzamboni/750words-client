@@ -335,6 +335,9 @@ if text_field:
     # Otherwise, prepare to enter text
     if not (args.count or args.text):
         enter_text = True
+        # Print current word count in any case, but optionally, can be
+        # controlled with --quiet
+        eprint("Current word count: "+str(current_word_count))
         # If --only-if-needed is used without --replace, we need to check if we
         # already have enough words
         if (not args.replace) and args.only_if_needed and (current_word_count >= args.min):
