@@ -6,9 +6,9 @@ You can see its annotated source code in the [750words-client.org](https://githu
 # Table of Contents
 
 1.  [Installation](#installation)
-    1.  [Docker image](#org6edb51f)
-    2.  [Local installation](#org0256e9f)
-2.  [Use](#usage)
+    1.  [Docker image](#docker-image)
+    2.  [Local installation](#local-installation)
+2.  [Usage](#usage)
 
 
 <a id="installation"></a>
@@ -16,7 +16,7 @@ You can see its annotated source code in the [750words-client.org](https://githu
 # Installation
 
 
-<a id="org6edb51f"></a>
+<a id="docker-image"></a>
 
 ## Docker image
 
@@ -35,7 +35,7 @@ If you want to build the image yourself, you can do it as follows from a checkou
     docker build --tag 750words-client .
 
 
-<a id="org0256e9f"></a>
+<a id="local-installation"></a>
 
 ## Local installation
 
@@ -54,7 +54,7 @@ You can then copy `750words.py` to somewhere in your `$PATH` to use it.
 
 <a id="usage"></a>
 
-# Use
+# Usage
 
     750words-client.py --help
 

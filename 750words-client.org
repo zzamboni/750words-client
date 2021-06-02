@@ -11,7 +11,7 @@ A command-line client for 750words.com.
 - [[#installation][Installation]]
   - [[#docker-image][Docker image]]
   - [[#local-installation][Local installation]]
-- [[#use][Use]]
+- [[#usage][Usage]]
 - [[#implementation][Implementation]]
   - [[#dependencies-and-dockerfile][Dependencies and Dockerfile]]
   - [[#code][Code]]
@@ -22,6 +22,9 @@ A command-line client for 750words.com.
 :END:
 
 ** Docker image
+:PROPERTIES:
+:CUSTOM_ID: docker-image
+:END:
 
 [[[https://hub.docker.com/r/zzamboni/750words-client][750words-client on Docker Hub]]][[[https://github.com/zzamboni/750words-client/blob/main/Dockerfile][Dockerfile]]]
 
@@ -44,6 +47,9 @@ docker build --tag 750words-client .
 #+end_src
 
 ** Local installation
+:PROPERTIES:
+:CUSTOM_ID: local-installation
+:END:
 
 Clone this repository:
 
@@ -59,7 +65,7 @@ You need the following libraries and components installed:
 
 You can then copy =750words.py= to somewhere in your =$PATH= to use it.
 
-* Use
+* Usage
 :PROPERTIES:
 :CUSTOM_ID: usage
 :END:
@@ -103,7 +109,7 @@ PASS_750WORDS environment variables.
 :END:
 ** Dependencies and Dockerfile
    :PROPERTIES:
-   :CUSTOM_ID: install-dependencies
+   :CUSTOM_ID: dependencies-and-dockerfile
    :END:
 
 Necessary libraries and software.
