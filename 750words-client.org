@@ -203,7 +203,7 @@ parser.add_argument("--quiet",
 args = parser.parse_args()
 #+end_src
 
-Verify that the username and password have been provided through the corresponding environmnt variables.
+Verify that the username and password have been provided through the corresponding environment variables.
 
 #+begin_src python
 username = os.getenv('USER_750WORDS') or None
