@@ -1,16 +1,30 @@
 #!/usr/bin/env python3
-def eprint(*eargs, **ekwargs):
-    if not args.quiet:
-        print(*eargs, file=sys.stderr, **ekwargs)
-
-min_words = 750
-max_words = 5000
-
 import argparse
 import os
 import sys
 import time
 import re
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+def eprint(*eargs, **ekwargs):
+    if not args.quiet:
+        print(*eargs, file=sys.stderr, **ekwargs)
+
+def word_count(text):
+    return len(text.split())
+
+def enter_text(driver, field, value):
+    driver.execute_script('arguments[0].value=arguments[1];', field, value)
+
+min_words = 750
+max_words = 5000
 
 parser = argparse.ArgumentParser(description="Interact with 750words.com from the command line.",
                                  epilog=("Your 750words.com credentials must be stored in the "
@@ -59,16 +73,8 @@ text_count = 0
 if not (args.count or args.text):
     for infile in args.FILE:
         text = text + infile.read() + "\n"
-    text_count = len(text.split())
+    text_count = word_count(text)
     eprint("Got text: " + text + (" (%d words)" % text_count))
-
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 opts = Options()
 opts.add_argument("--window-size=1200,800")
@@ -94,10 +100,8 @@ login_form = WebDriverWait(driver, 10).until(
 if login_form:
     user_field = driver.find_element_by_id('person_email_address')
     password_field = driver.find_element_by_id('person_password')
-    # user_field.send_keys(username)
-    driver.execute_script('arguments[0].value=arguments[1];', user_field, username)
-    # password_field.send_keys(password)
-    driver.execute_script('arguments[0].value=arguments[1];', password_field, password)
+    enter_text(driver, user_field, username)
+    enter_text(driver, password_field, password)
     login_form.submit()
 else:
     raise BaseException("Could not find login form in https://750words.com/auth")
@@ -113,7 +117,7 @@ text_field = WebDriverWait(driver, 10).until(
 if text_field:
     # Get current text and word count
     current_text = text_field.get_attribute("value")
-    current_word_count = len(current_text.split())
+    current_word_count = word_count(current_text)
 
     # If --count is given, print the word count
     if args.count:
@@ -152,8 +156,7 @@ if text_field:
 
             # Enter the new text in the text field
             eprint("Entering new text...")
-            # text_field.send_keys(text)
-            driver.execute_script('arguments[0].value=arguments[1];', text_field, current_text + text)
+            enter_text(driver, text_field, current_text + text)
 
             # Send Cmd-s to force save
             eprint("Saving...")
@@ -167,6 +170,7 @@ if text_field:
             # instead of its existence.
             warning_dialog_text = driver.find_element_by_xpath('//div[@id="losing_words"]').text
             if warning_dialog_text:
+                eprint("Got the reduced-word-count warning dialog, clicking 'Save anyway'")
                 driver.find_element_by_xpath('//div[@class="ui-dialog-buttonset"]/button[1]').click()
 
             # Short wait to ensure text is saved correctly
@@ -174,7 +178,7 @@ if text_field:
 
             # Get new text and word count
             new_text = text_field.get_attribute("value")
-            new_word_count = len(new_text.split())
+            new_word_count = word_count(new_text)
             eprint("New word count: %d" % new_word_count)
 else:
     raise BaseException("Could not find text entry form in page.")
