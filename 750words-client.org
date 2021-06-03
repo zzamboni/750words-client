@@ -7,7 +7,7 @@
 
 A command-line client for 750words.com.
 
-* Table of Contents :TOC:
+* Table of Contents :TOC_3:
 - [[#installation][Installation]]
   - [[#docker-image][Docker image]]
   - [[#installation-from-source][Installation from source]]
@@ -15,6 +15,14 @@ A command-line client for 750words.com.
 - [[#implementation][Implementation]]
   - [[#dependencies-and-dockerfile][Dependencies and Dockerfile]]
   - [[#code][Code]]
+    - [[#libraries][Libraries]]
+    - [[#utility-functions][Utility functions]]
+    - [[#configuration-and-command-line-arguments][Configuration and command line arguments]]
+    - [[#read-new-text][Read new text]]
+    - [[#start-up-chrome-using-selenium-and-connect-to-750wordscom][Start up Chrome using Selenium and connect to 750words.com]]
+    - [[#authenticate][Authenticate]]
+    - [[#do-the-work][Do the work]]
+    - [[#finish][Finish]]
 
 * Installation
 :PROPERTIES:
@@ -104,6 +112,24 @@ optional arguments:
 Your 750words.com credentials must be stored in the USER_750WORDS and
 PASS_750WORDS environment variables.
 #+end_example
+
+For example (in this case there were already some words entered previously in the day):
+
+#+begin_src bash
+> echo "This is some text to enter" | 750words-client.py
+Got text: This is some text to enter
+
+ (6 words)
+Connecting to 750words.com...
+Authenticating...
+Finding current text entry...
+Current word count: 1324
+Entering new text...
+Saving...
+New word count: 1330
+You completed your 750 words for today!
+Done!
+#+end_src
 
 * Implementation
 :PROPERTIES:
@@ -366,7 +392,7 @@ if text_field:
     # Otherwise, prepare to enter text
     if not (args.count or args.text):
         add_text = True
-        # Print current word count in any case, but optionally, can be
+        # Print current word count also when adding text, but this can be
         # controlled with --quiet
         eprint("Current word count: "+str(current_word_count))
         # If --only-if-needed is used without --replace, we need to check if we
@@ -426,6 +452,9 @@ else:
    :PROPERTIES:
    :CUSTOM_ID: finish
    :END:
+
+We close the driver, which also quits the Chrome instance.
+
 #+begin_src python
 eprint("Done!")
 driver.quit()

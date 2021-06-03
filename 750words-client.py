@@ -130,7 +130,7 @@ if text_field:
     # Otherwise, prepare to enter text
     if not (args.count or args.text):
         add_text = True
-        # Print current word count in any case, but optionally, can be
+        # Print current word count also when adding text, but this can be
         # controlled with --quiet
         eprint("Current word count: "+str(current_word_count))
         # If --only-if-needed is used without --replace, we need to check if we

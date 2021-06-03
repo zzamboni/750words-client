@@ -86,3 +86,19 @@ You can then copy `750words.py` to somewhere in your `$PATH` to use it.
     Your 750words.com credentials must be stored in the USER_750WORDS and
     PASS_750WORDS environment variables.
 
+For example (in this case there were already some words entered previously in the day):
+
+    > echo "This is some text to enter" | 750words-client.py
+    Got text: This is some text to enter
+    
+     (6 words)
+    Connecting to 750words.com...
+    Authenticating...
+    Finding current text entry...
+    Current word count: 1324
+    Entering new text...
+    Saving...
+    New word count: 1330
+    You completed your 750 words for today!
+    Done!
+
