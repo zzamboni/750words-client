@@ -7,7 +7,7 @@ You can see its annotated source code in the [750words-client.org](https://githu
 
 1.  [Installation](#installation)
     1.  [Docker image](#docker-image)
-    2.  [Local installation](#local-installation)
+    2.  [Installation from source](#local-installation)
 2.  [Usage](#usage)
 
 
@@ -37,9 +37,11 @@ If you want to build the image yourself, you can do it as follows from a checkou
 
 <a id="local-installation"></a>
 
-## Local installation
+## Installation from source
 
-Clone this repository:
+[[GitHub repository](https://github.com/zzamboni/750words-client)]
+
+Clone the git repository:
 
     git clone https://github.com/zzamboni/750words-client.git
 
