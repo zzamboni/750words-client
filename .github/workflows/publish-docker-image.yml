@@ -1,7 +1,7 @@
 name: "2: Publish Docker image if test was successful"
 on:
   workflow_run:
-    workflows: ["Test 750words-client"]
+    workflows: ["1: Test 750words-client"]
     types: [completed]
 
 jobs:
