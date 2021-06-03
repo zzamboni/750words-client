@@ -11,6 +11,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Python libraries
+        run: |
+          pip install --no-cache-dir -r requirements.txt
+
       - name: Post current diffs to 750words.com
         env:
           USER_750WORDS: ${{ secrets.USER_750WORDS }}
