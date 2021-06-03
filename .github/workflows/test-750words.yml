@@ -1,4 +1,4 @@
-name: Test 750words-client
+name: "1: Test 750words-client"
 on: push
 
 jobs:

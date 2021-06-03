@@ -1,4 +1,4 @@
-name: Publish Docker image if test was successful
+name: "2: Publish Docker image if test was successful"
 on:
   workflow_run:
     workflows: ["Test 750words-client"]
