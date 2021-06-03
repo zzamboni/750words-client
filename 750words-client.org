@@ -416,6 +416,8 @@ if text_field:
             new_text = text_field.get_attribute("value")
             new_word_count = word_count(new_text)
             eprint("New word count: %d" % new_word_count)
+            if new_word_count >= args.min:
+                eprint("You completed your %d words for today!" % args.min)
 else:
     raise BaseException("Could not find text entry form in page.")
 #+end_src
