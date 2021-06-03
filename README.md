@@ -26,9 +26,9 @@ You can use `750words-client.py` from its Docker image as follows (the image wil
 
     docker run zzamboni/750words-client --help
 
-Note: you need to pass the `-i` option to `docker run` if you want to read the input from standard input, e.g.:
+Note that you have to define the `USER_750WORDS` and `PASS_750WORDS` environment variables in your environment, and pass them to the container. You also need to pass the `-i` option to `docker run` if you want to read the input from standard input, e.
 
-    cat file.txt | docker run -i zzamboni/750words-client
+    cat file.txt | docker run -i -e USER_750WORDS -e PASS_750WORDS zzamboni/750words-client
 
 If you want to build the image yourself, you can do it as follows from a checkout of its [git repository](https://github.com/zzamboni/750words-client):
 
