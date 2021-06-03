@@ -1,0 +1,26 @@
+name: Test run for 750words-client
+on: push
+
+jobs:
+  test-750words-client:
+    name: Test 750words-client
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Post current diffs to 750words.com
+        env:
+          USER_750WORDS: ${{ secrets.USER_750WORDS }}
+          PASS_750WORDS: ${{ secrets.PASS_750WORDS }}
+        run: |
+          git diff ${{ github.event.before }}.. | ./750words-client.py
+
+      - name: Get new word count
+        env:
+          USER_750WORDS: ${{ secrets.USER_750WORDS }}
+          PASS_750WORDS: ${{ secrets.PASS_750WORDS }}
+        run: |
+          ./750words-client.py --count

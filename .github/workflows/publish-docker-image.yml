@@ -1,10 +1,14 @@
 name: Publish Docker image
-on: push
+on:
+  workflow_run:
+    workflows: ["Test 750words-client"]
+    types: [completed]
 
 jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v2
@@ -28,3 +32,13 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ${{ github.repository }}
           short-description: ${{ github.event.repository.description }}
+
+  notify_failure:
+    name: "Produce error message"
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - name: Error message
+        run: |
+          echo "::error::Test of 750words-client failed, not publishing new Docker image."
+          exit 1
