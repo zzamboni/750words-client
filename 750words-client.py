@@ -23,6 +23,11 @@ def word_count(text):
 def enter_text(driver, field, value):
     driver.execute_script('arguments[0].value=arguments[1];', field, value)
 
+def find_text_field(driver):
+    return WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, 'entry_body'))
+    )
+
 min_words = 750
 max_words = 5000
 
@@ -90,6 +95,7 @@ opts.add_argument("--verbose")
 opts.add_argument("--disable-setuid-sandbox")
 opts.add_argument("--disable-dev-shm-usage")
 opts.add_argument("--disable-infobars")
+opts.add_argument("--disable-popup-blocking")
 
 driver = webdriver.Chrome(options=opts)
 
@@ -114,9 +120,7 @@ eprint("Finding current text entry...")
 # We use WebDriverWait to wait (with a limit) until the page is loaded and the
 # necessary element appears.
 # text_field = driver.find_element_by_id('entry_body')
-text_field = WebDriverWait(driver, 10).until(
-    EC.presence_of_element_located((By.ID, 'entry_body'))
-)
+text_field = find_text_field(driver)
 
 if text_field:
     # Get current text and word count
@@ -161,10 +165,11 @@ if text_field:
             # Enter the new text in the text field
             eprint("Entering new text...")
             enter_text(driver, text_field, current_text + text)
+            text_field.send_keys("\n")
 
-            # Send Cmd-s to force save
+            # Send Ctrl-s to force save
             eprint("Saving...")
-            ActionChains(driver).key_down(Keys.COMMAND).send_keys('s').key_up(Keys.COMMAND).perform()
+            text_field.send_keys(Keys.CONTROL, "s")
 
             # 750words issues a warning dialog if the word count gets reduced by
             # a lot when saving the text. This might happen with --replace, so
@@ -175,12 +180,16 @@ if text_field:
             warning_dialog_text = driver.find_element_by_xpath('//div[@id="losing_words"]').text
             if warning_dialog_text:
                 eprint("Got the reduced-word-count warning dialog, clicking 'Save anyway'")
-                driver.find_element_by_xpath('//div[@class="ui-dialog-buttonset"]/button[1]').click()
+                # Press Enter to select the default button, which is "Save anyway"
+                driver.switch_to.active_element.send_keys(Keys.ENTER)
 
-            # Short wait to ensure text is saved correctly
-            time.sleep(2)
+            eprint("Reloading page to ensure save succeeded")
+            # Disable "Are you sure?" alert on reload
+            driver.execute_script("window.onbeforeunload = function() {};")
+            driver.refresh()
 
             # Get new text and word count
+            text_field = find_text_field(driver)
             new_text = text_field.get_attribute("value")
             new_word_count = word_count(new_text)
             eprint("New word count: %d" % new_word_count)
