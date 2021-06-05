@@ -61,8 +61,8 @@ You can then copy `750words.py` to somewhere in your `$PATH` to use it.
     750words-client.py --help
 
     usage: 750words-client.py [-h] [--min MIN] [--max MAX] [--only-if-needed]
-                              [--replace] [--count] [--text] [--no-headless]
-                              [--quiet]
+                              [--replace] [--count] [--text] [--quiet]
+                              [--no-headless] [--no-quit]
                               [FILE ...]
     
     Interact with 750words.com from the command line.
@@ -80,8 +80,11 @@ You can then copy `750words.py` to somewhere in your `$PATH` to use it.
                         add at the end.
       --count           Don't upload text, only print the current word count.
       --text            Don't upload text, only print the current text.
-      --no-headless     Disable headless mode (opens the Chrome app window).
       --quiet           Don't print progress messages.
+    
+    debugging options:
+      --no-headless     Disable headless mode (opens the Chrome app window).
+      --no-quit         Don't quit the browser at the end.
     
     Your 750words.com credentials must be stored in the USER_750WORDS and
     PASS_750WORDS environment variables.

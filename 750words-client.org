@@ -87,8 +87,8 @@ You can then copy =750words.py= to somewhere in your =$PATH= to use it.
 #+RESULTS:
 #+begin_example
 usage: 750words-client.py [-h] [--min MIN] [--max MAX] [--only-if-needed]
-                          [--replace] [--count] [--text] [--no-headless]
-                          [--quiet]
+                          [--replace] [--count] [--text] [--quiet]
+                          [--no-headless] [--no-quit]
                           [FILE ...]
 
 Interact with 750words.com from the command line.
@@ -106,8 +106,11 @@ optional arguments:
                     add at the end.
   --count           Don't upload text, only print the current word count.
   --text            Don't upload text, only print the current text.
-  --no-headless     Disable headless mode (opens the Chrome app window).
   --quiet           Don't print progress messages.
+
+debugging options:
+  --no-headless     Disable headless mode (opens the Chrome app window).
+  --no-quit         Don't quit the browser at the end.
 
 Your 750words.com credentials must be stored in the USER_750WORDS and
 PASS_750WORDS environment variables.
@@ -263,12 +266,16 @@ parser.add_argument("--count",
 parser.add_argument("--text",
                     help="Don't upload text, only print the current text.",
                     action="store_true")
-parser.add_argument("--no-headless",
-                    help="Disable headless mode (opens the Chrome app window).",
-                    action="store_true")
 parser.add_argument("--quiet",
                     help="Don't print progress messages.",
                     action="store_true")
+debug_options = parser.add_argument_group('debugging options')
+debug_options.add_argument("--no-headless",
+                           help="Disable headless mode (opens the Chrome app window).",
+                           action="store_true")
+debug_options.add_argument("--no-quit",
+                           help="Don't quit the browser at the end.",
+                           action="store_true")
 args = parser.parse_args()
 #+end_src
 
@@ -457,5 +464,6 @@ We close the driver, which also quits the Chrome instance.
 
 #+begin_src python
 eprint("Done!")
-driver.quit()
+if not args.no_quit:
+    driver.quit()
 #+end_src

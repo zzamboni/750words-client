@@ -53,12 +53,16 @@ parser.add_argument("--count",
 parser.add_argument("--text",
                     help="Don't upload text, only print the current text.",
                     action="store_true")
-parser.add_argument("--no-headless",
-                    help="Disable headless mode (opens the Chrome app window).",
-                    action="store_true")
 parser.add_argument("--quiet",
                     help="Don't print progress messages.",
                     action="store_true")
+debug_options = parser.add_argument_group('debugging options')
+debug_options.add_argument("--no-headless",
+                           help="Disable headless mode (opens the Chrome app window).",
+                           action="store_true")
+debug_options.add_argument("--no-quit",
+                           help="Don't quit the browser at the end.",
+                           action="store_true")
 args = parser.parse_args()
 
 username = os.getenv('USER_750WORDS') or None
@@ -186,4 +190,5 @@ else:
     raise BaseException("Could not find text entry form in page.")
 
 eprint("Done!")
-driver.quit()
+if not args.no_quit:
+    driver.quit()
