@@ -438,6 +438,7 @@ if text_field:
             # Send Ctrl-s to force save
             eprint("Saving...")
             text_field.send_keys(Keys.CONTROL, "s")
+            time.sleep(1)
 
             # 750words issues a warning dialog if the word count gets reduced by
             # a lot when saving the text. This might happen with --replace, so
@@ -455,6 +456,7 @@ if text_field:
             # Disable "Are you sure?" alert on reload
             driver.execute_script("window.onbeforeunload = function() {};")
             driver.refresh()
+            time.sleep(1)
 
             # Get new text and word count
             text_field = find_text_field(driver)
