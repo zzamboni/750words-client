@@ -1,3 +1,24 @@
+;;; 750words-client.el --- Emacs integration for 750words.com -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2021 Diego Zamboni
+;;
+;; Author: Diego Zamboni <https://github.com/zzamboni>
+;; Maintainer: Diego Zamboni <diego@zzamboni.org>
+;; Created: June 10, 2021
+;; Modified: June 10, 2021
+;; Version: 0.0.1
+;; Keywords: org, writing
+;; Homepage: https://github.com/zzamboni/750words-client
+;; Package-Requires: ((emacs "24.3"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  See https://github.com/zzamboni/750words-client for full usage instructions.
+;;
+;;; Code:
+
 (defvar 750words-client-command "750words-client.py %s"
 
   "Program to call to post text to 750words.com. It must contain
@@ -7,7 +28,7 @@
 
   (setq 750words-client-command \"docker run -i -e USER_750WORDS -e PASS_750WORDS zzamboni/750words-client\")")
 
-(defun 750words-credentials (&optional create)
+(defun 750words-client-credentials (&optional create)
   "Fetch/create 750words.com credentials.
 
 Search credentials from 750words.com in the configured
@@ -22,7 +43,7 @@ a function returned to save them.
 Returns a list containing the following elements: the
 750words.com username, the password, and a function which must be
 called to save them. For an example of how to use it, see
-`750words-credentials-setenv'."
+`750words-client-credentials-setenv'."
   (let* ((auth-source-creation-prompts
           '((user  . "750words.com username: ")
             (secret . "750words.com password for %u: ")))
@@ -39,38 +60,26 @@ called to save them. For an example of how to use it, see
               (plist-get found :save-function))
       nil)))
 
-(defun 750words-credentials-setenv (&optional save)
+(defun 750words-client-credentials-setenv (&optional save)
   "Fetch 750words.com credentials and store them in environment variables.
 
-Call `750words-credentials' to fetch the credentials, and stores
+Call `750words-client-credentials' to fetch the credentials, and stores
 the username and password in the USER_750WORDS and PASS_750WORDS
 environment variables, respectively, so that they can be used by
 750words-client.
 
 If called interactively with a prefix argument (`C-u M-x
-750words-credentials-setenv'), the credentials are prompted for
+750words-client-credentials-setenv'), the credentials are prompted for
 and saved to the configured auth source if they are not found."
   (interactive "P")
-  (let ((creds (750words-credentials save)))
+  (let ((creds (750words-client-credentials save)))
     (when creds
       (setenv "USER_750WORDS" (nth 0 creds))
       (setenv "PASS_750WORDS" (nth 1 creds))
       (when (functionp (nth 2 creds))
         (funcall (nth 2 creds))))))
 
-(defun 750words--post-process-fn (output-buffer-name process signal)
-  "Switch to output buffer and set it to special-mode.
-
-This function gets called when the 750words-client process
-finishes. Switch to its output buffer and set it to
-`special-mode', which makes it read-only and the user can dismiss
-it by pressing `q'."
-  (when (memq (process-status process) '(exit signal))
-    (switch-to-buffer-other-window output-buffer-name)
-    (special-mode)
-    (shell-command-sentinel process signal)))
-
-(defun 750words-region (start end)
+(defun 750words-client-region (start end)
   "Post the current region or the whole buffer to 750words.com
 
 If run interactively with a region selected, it will post the
@@ -96,21 +105,35 @@ the part of the buffer to post."
       (if (process-live-p proc)
           (set-process-sentinel
            proc
-           (apply-partially #'750words--post-process-fn output-buffer))
+           (apply-partially #'750words-client--post-process-fn output-buffer))
         (message "Running '%s' failed." cmd)))))
 
-(defun 750words-buffer ()
+(defun 750words-client--post-process-fn (output-buffer-name process signal)
+  "Switch to output buffer and set it to special-mode.
+
+This function gets called when the 750words-client process
+finishes. Switch to its output buffer and set it to
+`special-mode', which makes it read-only and the user can dismiss
+it by pressing `q'."
+  (when (memq (process-status process) '(exit signal))
+    (switch-to-buffer-other-window output-buffer-name)
+    (special-mode)
+    (shell-command-sentinel process signal)))
+
+(defun 750words-client-buffer ()
   "Post the current buffer to 750words.com.
 
 Posts the entire contents of the current buffer. If you want to
-post only a part of it, see `750words-region-or-buffer'."
+post only a part of it, see `750words-client-region' or
+`750words-client-region-or-buffer'."
   (interactive)
-  (750words-region (point-min) (point-max)))
+  (750words-client-region (point-min) (point-max)))
 
-(defun 750words-region-or-buffer ()
+(defun 750words-client-region-or-buffer ()
   (interactive)
   (if (region-active-p)
-      (750words-region (point) (mark))
-    (750words-buffer)))
+      (750words-client-region (point) (mark))
+    (750words-client-buffer)))
 
 (provide '750words-client)
+;;; 750words-client.el ends here
