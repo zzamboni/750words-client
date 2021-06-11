@@ -27,4 +27,4 @@ jobs:
           USER_750WORDS: ${{ secrets.USER_750WORDS }}
           PASS_750WORDS: ${{ secrets.PASS_750WORDS }}
         run: |
-          ./750words-client.py --count
+          ./750words-client.py --quiet --count
