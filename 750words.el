@@ -26,7 +26,7 @@
   before calling it. If you want to use the 750words-client
   Docker container, you can set it as follows:
 
-  (setq 750words-client-command \"docker run -i -e USER_750WORDS -e PASS_750WORDS zzamboni/750words-client\")")
+  (setq 750words-client-command \"cat %s | docker run -i -e USER_750WORDS -e PASS_750WORDS zzamboni/750words-client\")")
 
 (defun 750words-credentials (&optional create)
   "Fetch/create 750words.com credentials.
