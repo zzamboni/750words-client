@@ -499,6 +499,9 @@ The code below integrates =750words-client= into Emacs, so I can post text direc
 The =750words= Emacs library allows using the =750words-client= command line program to post text from within Emacs. With it, you can post an entire buffer, or a selected region. Support for =auth-sources= is provided so you don't have to store your credentials in your Emacs config.
 
 *** Installation
+:PROPERTIES:
+:CUSTOM_ID: emacs-installation
+:END:
 
 First, you need to have the =750words-client.py= command line installed, or its Docker image.
 
@@ -524,6 +527,9 @@ If you prefer to install by hand, you can clone this repository, store the =750w
 #+end_src
 
 *** Usage
+:PROPERTIES:
+:CUSTOM_ID: emacs-usage
+:END:
 
 If you use =auth-sources=, you can store your 750words.com credentials by storing them in the appropriate store associated with the host "750words.com". For example, if variable =auth-sources= contains =~/.authinfo.gpg=, you can add a line in the following format:
 
