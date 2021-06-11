@@ -13,6 +13,6 @@ You can see its full annotated source code in the [[https://github.com/zzamboni/
 
 #+toc: headlines 3
 
-#+include: "./750words-client.org::#command-line-client"
-
+#+include: "./750words-client.org::#installation"
+#+include: "./750words-client.org::#usage"
 #+include: "./750words-client.org::#emacs-integration"
