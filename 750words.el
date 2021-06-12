@@ -7,7 +7,7 @@
 ;; Created: June 10, 2021
 ;; Modified: June 10, 2021
 ;; Version: 0.0.1
-;; Keywords: org, writing
+;; Keywords: files, org, writing
 ;; Homepage: https://github.com/zzamboni/750words-client
 ;; Package-Requires: ((emacs "24.3"))
 ;;
@@ -15,18 +15,24 @@
 ;;
 ;;; Commentary:
 ;;
-;;  See https://github.com/zzamboni/750words-client for full usage instructions.
+;; This package provides functions for posting text from Emacs to the
+;; 750words.com website.
+;;
+;; See https://github.com/zzamboni/750words-client for full usage instructions.
 ;;
 ;;; Code:
 
+(require 'auth-source)
+
 (defvar 750words-client-command "750words-client.py %s"
 
-  "Program to call to post text to 750words.com. It must contain
-  one '%s' representing the file in which the text will be stored
-  before calling it. If you want to use the 750words-client
-  Docker container, you can set it as follows:
+  "Program to call to post text to 750words.com.
 
-  (setq 750words-client-command \"cat %s | docker run -i -e USER_750WORDS -e PASS_750WORDS zzamboni/750words-client\")")
+It must contain one '%s' representing the file in which the text
+will be stored before calling it. If you want to use the
+750words-client Docker container, you can set it as follows:
+
+\(setq 750words-client-command \"cat %s | docker run -i -e USER_750WORDS -e PASS_750WORDS zzamboni/750words-client\"\)")
 
 (defun 750words-credentials (&optional create)
   "Fetch/create 750words.com credentials.
@@ -68,9 +74,9 @@ the username and password in the USER_750WORDS and PASS_750WORDS
 environment variables, respectively, so that they can be used by
 750words-client.
 
-If called interactively with a prefix argument (`C-u M-x
-750words-credentials-setenv'), the credentials are prompted for
-and saved to the configured auth source if they are not found."
+If SAVE is t or if called interactively with a prefix argument,
+prompt for the credentials if they are not found, and save them
+to the configured auth source."
   (interactive "P")
   (let ((creds (750words-credentials save)))
     (when creds
@@ -80,7 +86,7 @@ and saved to the configured auth source if they are not found."
         (funcall (nth 2 creds))))))
 
 (defun 750words-region (start end)
-  "Post the current region or the whole buffer to 750words.com
+  "Post the current region to 750words.com.
 
 If run interactively with a region selected, it will post the
 content of the region.
@@ -109,12 +115,13 @@ the part of the buffer to post."
         (message "Running '%s' failed." cmd)))))
 
 (defun 750words--post-process-fn (output-buffer-name process signal)
-  "Switch to output buffer and set it to special-mode.
+  "Switch to output buffer and set to `special-mode' when process exits.
 
-This function gets called when the 750words-client process
-finishes. Switch to its output buffer and set it to
-`special-mode', which makes it read-only and the user can dismiss
-it by pressing `q'."
+This function gets called when the 750words-client PROCESS
+finishes with an exit SIGNAL. Switch to its output buffer as
+indicated by OUTPUT-BUFFER-NAME and set it to `special-mode',
+which makes it read-only and the user can dismiss it by pressing
+`q'."
   (when (memq (process-status process) '(exit signal))
     (switch-to-buffer-other-window output-buffer-name)
     (special-mode)
@@ -130,6 +137,10 @@ post only a part of it, see `750words-region' or
   (750words-region (point-min) (point-max)))
 
 (defun 750words-region-or-buffer ()
+  "Post the current region or the whole buffer to 750words.com.
+
+If a region is selected, post it, otherwise post the whole
+buffer."
   (interactive)
   (if (region-active-p)
       (750words-region (point) (mark))
