@@ -557,7 +557,7 @@ After you have loaded your credentials, you can use the following commands to po
 - =M-x 750words-region=: post the currently selected region (issues an error if no region is selected).
 - =M-x 750words-buffer=: post the entire current buffer.
 - If you are in an Org buffer and loaded =ox-750words=, you can open the export screen (=C-c C-e=) and find the item =[7] Post to 750words.com= inside the =[m] Export to Markdown= section to post your current Org file in Markdown format.
-
+- From LISP, you can also use =(750words-file FILENAME)= to post the contents of =FILENAME=.
 By default, the =750words-client.py= is executed, assuming you have it installed. If you want to use its [[https://hub.docker.com/r/zzamboni/750words-client][Docker image]], you can configure it as follows:
 
 #+begin_src emacs-lisp
@@ -576,7 +576,7 @@ By default, the =750words-client.py= is executed, assuming you have it installed
 *** File header (required by MELPA)
 
 #+begin_src emacs-lisp
-;;; 750words.el --- Emacs integration for 750words.com -*- lexical-binding: t; -*-
+;;; 750words.el --- Emacs integration and Org exporter for 750words.com -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2021 Diego Zamboni
 ;;
@@ -594,8 +594,13 @@ By default, the =750words-client.py= is executed, assuming you have it installed
 ;;; Commentary:
 ;;
 ;; This package provides functions for posting text from Emacs to the
-;; 750words.com website.
-;;
+;; 750words.com website. It includes two libraries:
+;; 
+;; - `750words' contains functions to handle authentication and to post a file,
+;;   the current buffer or current selected region to 750words.com.
+;; - `ox-750words'' defines an Org exporter to convert Org text to Markdown and
+;;   then post it to 750words.com
+;; 
 ;; See https://github.com/zzamboni/750words-client for full usage instructions.
 ;;
 ;;; Code:
@@ -690,6 +695,9 @@ Finally we get to the functions that do the actual work!
 
 #+begin_src emacs-lisp
 (defun 750words-file (fname)
+  "Post a file to 750words.com.
+
+Post the contents of FNAME to 750words.com."
   ;; From https://emacs.stackexchange.com/a/42174/11843: Execute the command
   ;; asynchronously, and set up a sentinel to detect when the process ends and
   ;; set up its buffer to special-mode, so that it can be easily dismissed by
@@ -831,6 +839,17 @@ We define the '750words export backend as derived from the Markdown exporter, an
 
 #+begin_src emacs-lisp
 (defun 750words-export-to-750words (subtreep visible-only)
+  "Post Org text to 750words.com.
+
+The Org buffer is first converted to Markdown using ox-md, and
+the result posted to 750words.com.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements."
   (let* ((outfile (make-temp-file "ox-750words"))
          (org-export-with-smart-quotes nil))
     (org-export-to-file 'md outfile nil subtreep visible-only)

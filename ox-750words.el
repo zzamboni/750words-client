@@ -31,6 +31,17 @@
             (lambda (_a s v _b) (750words-export-to-750words s v))))))
 
 (defun 750words-export-to-750words (subtreep visible-only)
+  "Post Org text to 750words.com.
+
+The Org buffer is first converted to Markdown using ox-md, and
+the result posted to 750words.com.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements."
   (let* ((outfile (make-temp-file "ox-750words"))
          (org-export-with-smart-quotes nil))
     (org-export-to-file 'md outfile nil subtreep visible-only)

@@ -1,4 +1,4 @@
-;;; 750words.el --- Emacs integration for 750words.com -*- lexical-binding: t; -*-
+;;; 750words.el --- Emacs integration and Org exporter for 750words.com -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2021 Diego Zamboni
 ;;
@@ -16,8 +16,13 @@
 ;;; Commentary:
 ;;
 ;; This package provides functions for posting text from Emacs to the
-;; 750words.com website.
-;;
+;; 750words.com website. It includes two libraries:
+;; 
+;; - `750words' contains functions to handle authentication and to post a file,
+;;   the current buffer or current selected region to 750words.com.
+;; - `ox-750words'' defines an Org exporter to convert Org text to Markdown and
+;;   then post it to 750words.com
+;; 
 ;; See https://github.com/zzamboni/750words-client for full usage instructions.
 ;;
 ;;; Code:
@@ -86,6 +91,9 @@ to the configured auth source."
         (funcall (nth 2 creds))))))
 
 (defun 750words-file (fname)
+  "Post a file to 750words.com.
+
+Post the contents of FNAME to 750words.com."
   ;; From https://emacs.stackexchange.com/a/42174/11843: Execute the command
   ;; asynchronously, and set up a sentinel to detect when the process ends and
   ;; set up its buffer to special-mode, so that it can be easily dismissed by
