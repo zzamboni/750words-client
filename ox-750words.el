@@ -9,7 +9,7 @@
 ;; Version: 0.0.1
 ;; Keywords: files, org, writing
 ;; Homepage: https://github.com/zzamboni/750words-client
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Requires: ((emacs "24.4"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -28,9 +28,9 @@
   :menu-entry
   '(?m 1
        ((?7 "Post to 750words.com"
-            (lambda (_a s v _b) (750words-export-to-750words s v))))))
+            (lambda (_a s v _b) (org-750words-export-to-750words s v))))))
 
-(defun 750words-export-to-750words (subtreep visible-only)
+(defun org-750words-export-to-750words (subtreep visible-only)
   "Post Org text to 750words.com.
 
 The Org buffer is first converted to Markdown using ox-md, and
