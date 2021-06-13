@@ -4,7 +4,7 @@
 
 A command-line client for 750words.com, and libraries to use it from within Emacs and Org mode.
 
-* Table of Contents :TOC_3:
+* Table of Contents :TOC_3:noexport:
 - [[#installation][Installation]]
   - [[#docker-image][Docker image]]
   - [[#installation-from-source][Installation from source]]
@@ -28,6 +28,11 @@ A command-line client for 750words.com, and libraries to use it from within Emac
     - [[#file-header-required-by-melpa][File header (required by MELPA)]]
     - [[#libraries-and-configuration][Libraries and configuration]]
     - [[#authentication][Authentication]]
+    - [[#posting-text-to-750wordscom][Posting text to 750words.com]]
+  - [[#ox-750words-org-exporter][=ox-750words= Org exporter]]
+    - [[#file-header-required-by-melpa-1][File header (required by MELPA)]]
+    - [[#define-the-new-exporter][Define the new exporter]]
+    - [[#export-text-to-750wordscom][Export text to 750words.com]]
 
 * Installation
 :PROPERTIES:
@@ -61,7 +66,7 @@ docker build --tag 750words-client .
 
 ** Installation from source
 :PROPERTIES:
-:CUSTOM_ID: local-installation
+:CUSTOM_ID: installation-from-source
 :END:
 
 [[[https://github.com/zzamboni/750words-client][GitHub repository]]]
@@ -141,7 +146,7 @@ Done!
 
 * Client Implementation
 :PROPERTIES:
-:CUSTOM_ID: implementation
+:CUSTOM_ID: client-implementation
 :END:
 ** Dependencies and Dockerfile
    :PROPERTIES:
@@ -499,7 +504,7 @@ The code below integrates =750words-client= into Emacs, so I can post text direc
 :CUSTOM_ID: emacs-integration
 :END:
 
-The =750words= Emacs library allows using the =750words-client= command line program to post text from within Emacs. With it, you can post an entire buffer, or a selected region. Support for =auth-sources= is provided so you don't have to store your credentials in your Emacs config.
+The =750words= Emacs library allows using the =750words-client= command line program to post text from within Emacs. With it, you can post an entire buffer, or a selected region. Support for =auth-sources= is provided so you don't have to store your credentials in your Emacs config. Additionally, the =ox-750words= library enables an Org exporter which posts the contents of your Org buffer, region or subtree to 750words.com, converting it first to Markdown, which is understood by 750words.com.
 
 *** Installation
 :PROPERTIES:
@@ -517,16 +522,18 @@ For now the library is not yet in MELPA, so you need to install it from this rep
            :files ("*.el")))
 #+end_src
 
-And then load it from your =config.el= as follows:
+And then load it from your =config.el= as follows. You only need to load =ox-750words= if you want to use the exporter from within Org mode.
 
 #+begin_src emacs-lisp :tangle no
 (use-package! 750words)
+(use-package! ox-750words)
 #+end_src
 
-If you prefer to install by hand, you can clone this repository, store the =750words.el= file somewhere in your =load-path=, and load it as follows:
+If you prefer to install by hand, you can clone this repository, store the =750words.el= and =ox-750words.el= files somewhere in your =load-path=, and load them as follows:
 
 #+begin_src emacs-lisp :tangle no
 (require '750words)
+(require 'ox-750words)
 #+end_src
 
 *** Usage
@@ -549,6 +556,7 @@ After you have loaded your credentials, you can use the following commands to po
 - =M-x 750words-region-or-buffer=: if you have a region selected, it will be posted. Otherwise, the whole buffer will be posted.
 - =M-x 750words-region=: post the currently selected region (issues an error if no region is selected).
 - =M-x 750words-buffer=: post the entire current buffer.
+- If you are in an Org buffer and loaded =ox-750words=, you can open the export screen (=C-c C-e=) and find the item =[7] Post to 750words.com= inside the =[m] Export to Markdown= section to post your current Org file in Markdown format.
 
 By default, the =750words-client.py= is executed, assuming you have it installed. If you want to use its [[https://hub.docker.com/r/zzamboni/750words-client][Docker image]], you can configure it as follows:
 
@@ -675,37 +683,28 @@ to the configured auth source."
         (funcall (nth 2 creds))))))
 #+end_src
 
-Finally we get to the functions that do the actual work. =750words-region= posts an arbitrary region of the current buffer to 750words.com. When called interactively, it fetches the currently selected region, and produces an error if no region is selected.
+*** Posting text to 750words.com
+Finally we get to the functions that do the actual work!
+
+=750word-file= is the main backbone - it receives a filename, and posts it to 750words.com using =750words-client-command=, running it asynchronously and displaying the progress in a separate buffer, which is converted to =special-mode= at the end.
 
 #+begin_src emacs-lisp
-(defun 750words-region (start end)
-  "Post the current region to 750words.com.
-
-If run interactively with a region selected, it will post the
-content of the region.
-
-When called from LISP, pass START and END arguments to indicate
-the part of the buffer to post."
-  (interactive "r")
-  (let* ((fname (make-temp-file "750words"))
-         (output-buffer-name "*750words-client-command*"))
-    ;; Write the region to a temporary file
-    (write-region start end fname)
-
-    ;; From https://emacs.stackexchange.com/a/42174/11843: Execute the command
-    ;; asynchronously, and set up a sentinel to detect when the process ends and
-    ;; set up its buffer to special-mode, so that it can be easily dismissed by
-    ;; the user by pressing `q'.
-    (let* ((output-buffer (generate-new-buffer output-buffer-name))
-           (cmd (format 750words-client-command fname))
-           (proc (progn
-                   (async-shell-command cmd output-buffer)
-                   (get-buffer-process output-buffer))))
-      (if (process-live-p proc)
-          (set-process-sentinel
-           proc
-           (apply-partially #'750words--post-process-fn output-buffer))
-        (message "Running '%s' failed." cmd)))))
+(defun 750words-file (fname)
+  ;; From https://emacs.stackexchange.com/a/42174/11843: Execute the command
+  ;; asynchronously, and set up a sentinel to detect when the process ends and
+  ;; set up its buffer to special-mode, so that it can be easily dismissed by
+  ;; the user by pressing `q'.
+  (let* ((output-buffer-name "*750words-client-command*")
+         (output-buffer (generate-new-buffer output-buffer-name))
+         (cmd (format 750words-client-command fname))
+         (proc (progn
+                 (async-shell-command cmd output-buffer)
+                 (get-buffer-process output-buffer))))
+    (if (process-live-p proc)
+        (set-process-sentinel
+         proc
+         (apply-partially #'750words--post-process-fn output-buffer))
+      (message "Running '%s' failed." cmd))))
 #+end_src
 
 The previous function uses =750words--post-process-fn= to make it easier to see the results and clean up when the command is finished.
@@ -723,6 +722,25 @@ which makes it read-only and the user can dismiss it by pressing
     (switch-to-buffer-other-window output-buffer-name)
     (special-mode)
     (shell-command-sentinel process signal)))
+#+end_src
+
+=750words-region= posts an arbitrary region of the current buffer to 750words.com. When called interactively, it fetches the currently selected region, and produces an error if no region is selected.
+
+#+begin_src emacs-lisp
+(defun 750words-region (start end)
+  "Post the current region to 750words.com.
+
+If run interactively with a region selected, it will post the
+content of the region.
+
+When called from LISP, pass START and END arguments to indicate
+the part of the buffer to post."
+  (interactive "r")
+  (let* ((fname (make-temp-file "750words")))
+    ;; Write the region to a temporary file
+    (write-region start end fname)
+    ;; Post the temporary file
+    (750words-file fname)))
 #+end_src
 
 =750words-buffer= is simply a wrapper around =750words-region= which passes the whole buffer as the region to post.
@@ -757,4 +775,69 @@ We signal the package provided by this file.
 #+begin_src emacs-lisp
 (provide '750words)
 ;;; 750words.el ends here
+#+end_src
+
+** =ox-750words= Org exporter
+:PROPERTIES:
+:header-args:emacs-lisp: :tangle ox-750words.el
+:header-args: :mkdirp yes :comments no
+:END:
+
+The =ox-750words= library is an Org mode exporter which converts Org text to Markdown (since 750words.com understands Markdown) and posts it. It uses the =750words= library in the backend.
+
+*** File header (required by MELPA)
+
+#+begin_src emacs-lisp
+;;; ox-750words.el --- Org mode exporter for 750words.com -*- lexical-binding: t; -*-
+;;
+;; Copyright (C) 2021 Diego Zamboni
+;;
+;; Author: Diego Zamboni <https://github.com/zzamboni>
+;; Maintainer: Diego Zamboni <diego@zzamboni.org>
+;; Created: June 10, 2021
+;; Modified: June 10, 2021
+;; Version: 0.0.1
+;; Keywords: files, org, writing
+;; Homepage: https://github.com/zzamboni/750words-client
+;; Package-Requires: ((emacs "24.3"))
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;; An Org exporter which converts Org to Markdown and posts it to 750words.com.
+;;
+;; See https://github.com/zzamboni/750words-client for full usage instructions.
+;;
+;;; Code:
+#+end_src
+
+*** Define the new exporter
+
+We define the '750words export backend as derived from the Markdown exporter, and add its menu item under the Markdown menu.
+
+#+begin_src emacs-lisp
+(require '750words)
+(require 'ox-md)
+
+(org-export-define-derived-backend '750words 'md
+  :menu-entry
+  '(?m 1
+       ((?7 "Post to 750words.com"
+            (lambda (_a s v _b) (750words-export-to-750words s v))))))
+#+end_src
+
+*** Export text to 750words.com
+
+#+begin_src emacs-lisp
+(defun 750words-export-to-750words (subtreep visible-only)
+  (let* ((outfile (make-temp-file "ox-750words"))
+         (org-export-with-smart-quotes nil))
+    (org-export-to-file 'md outfile nil subtreep visible-only)
+    (750words-file outfile)))
+#+end_src
+
+#+begin_src emacs-lisp
+(provide 'ox-750words)
+;;; ox-750words.el ends here
 #+end_src

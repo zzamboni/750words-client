@@ -9,10 +9,10 @@ You can see its full annotated source code in the [750words-client.org](https://
 
 # Table of Contents
 
-1.  [750words command-line client](#org62df48c)
+1.  [750words command-line client](#orgfbfe4c3)
     1.  [Installation](#installation)
         1.  [Docker image](#docker-image)
-        2.  [Installation from source](#local-installation)
+        2.  [Installation from source](#installation-from-source)
     2.  [Usage](#usage)
     3.  [Emacs integration](#emacs-integration)
         1.  [Installation](#emacs-installation)
@@ -43,7 +43,7 @@ If you want to build the image yourself, you can do it as follows from a checkou
     docker build --tag 750words-client .
 
 
-<a id="local-installation"></a>
+<a id="installation-from-source"></a>
 
 ### Installation from source
 
@@ -118,7 +118,7 @@ For example (in this case there were already some words entered previously in th
 
 ## Emacs integration
 
-The `750words` Emacs library allows using the `750words-client` command line program to post text from within Emacs. With it, you can post an entire buffer, or a selected region. Support for `auth-sources` is provided so you don&rsquo;t have to store your credentials in your Emacs config.
+The `750words` Emacs library allows using the `750words-client` command line program to post text from within Emacs. With it, you can post an entire buffer, or a selected region. Support for `auth-sources` is provided so you don&rsquo;t have to store your credentials in your Emacs config. Additionally, the `ox-750words` library enables an Org exporter which posts the contents of your Org buffer, region or subtree to 750words.com, converting it first to Markdown, which is understood by 750words.com.
 
 
 <a id="emacs-installation"></a>
@@ -134,13 +134,15 @@ For now the library is not yet in MELPA, so you need to install it from this rep
                :repo "zzamboni/750words-client"
                :files ("*.el")))
 
-And then load it from your `config.el` as follows:
+And then load it from your `config.el` as follows. You only need to load `ox-750words` if you want to use the exporter from within Org mode.
 
     (use-package! 750words)
+    (use-package! ox-750words)
 
-If you prefer to install by hand, you can clone this repository, store the `750words.el` file somewhere in your `load-path`, and load it as follows:
+If you prefer to install by hand, you can clone this repository, store the `750words.el` and `ox-750words.el` files somewhere in your `load-path`, and load them as follows:
 
     (require '750words)
+    (require 'ox-750words)
 
 
 <a id="emacs-usage"></a>
@@ -160,6 +162,7 @@ After you have loaded your credentials, you can use the following commands to po
 -   `M-x 750words-region-or-buffer`: if you have a region selected, it will be posted. Otherwise, the whole buffer will be posted.
 -   `M-x 750words-region`: post the currently selected region (issues an error if no region is selected).
 -   `M-x 750words-buffer`: post the entire current buffer.
+-   If you are in an Org buffer and loaded `ox-750words`, you can open the export screen (`C-c C-e`) and find the item `[7] Post to 750words.com` inside the `[m] Export to Markdown` section to post your current Org file in Markdown format.
 
 By default, the `750words-client.py` is executed, assuming you have it installed. If you want to use its [Docker image](https://hub.docker.com/r/zzamboni/750words-client), you can configure it as follows:
 

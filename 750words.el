@@ -85,34 +85,22 @@ to the configured auth source."
       (when (functionp (nth 2 creds))
         (funcall (nth 2 creds))))))
 
-(defun 750words-region (start end)
-  "Post the current region to 750words.com.
-
-If run interactively with a region selected, it will post the
-content of the region.
-
-When called from LISP, pass START and END arguments to indicate
-the part of the buffer to post."
-  (interactive "r")
-  (let* ((fname (make-temp-file "750words"))
-         (output-buffer-name "*750words-client-command*"))
-    ;; Write the region to a temporary file
-    (write-region start end fname)
-
-    ;; From https://emacs.stackexchange.com/a/42174/11843: Execute the command
-    ;; asynchronously, and set up a sentinel to detect when the process ends and
-    ;; set up its buffer to special-mode, so that it can be easily dismissed by
-    ;; the user by pressing `q'.
-    (let* ((output-buffer (generate-new-buffer output-buffer-name))
-           (cmd (format 750words-client-command fname))
-           (proc (progn
-                   (async-shell-command cmd output-buffer)
-                   (get-buffer-process output-buffer))))
-      (if (process-live-p proc)
-          (set-process-sentinel
-           proc
-           (apply-partially #'750words--post-process-fn output-buffer))
-        (message "Running '%s' failed." cmd)))))
+(defun 750words-file (fname)
+  ;; From https://emacs.stackexchange.com/a/42174/11843: Execute the command
+  ;; asynchronously, and set up a sentinel to detect when the process ends and
+  ;; set up its buffer to special-mode, so that it can be easily dismissed by
+  ;; the user by pressing `q'.
+  (let* ((output-buffer-name "*750words-client-command*")
+         (output-buffer (generate-new-buffer output-buffer-name))
+         (cmd (format 750words-client-command fname))
+         (proc (progn
+                 (async-shell-command cmd output-buffer)
+                 (get-buffer-process output-buffer))))
+    (if (process-live-p proc)
+        (set-process-sentinel
+         proc
+         (apply-partially #'750words--post-process-fn output-buffer))
+      (message "Running '%s' failed." cmd))))
 
 (defun 750words--post-process-fn (output-buffer-name process signal)
   "Switch to output buffer and set to `special-mode' when process exits.
@@ -126,6 +114,21 @@ which makes it read-only and the user can dismiss it by pressing
     (switch-to-buffer-other-window output-buffer-name)
     (special-mode)
     (shell-command-sentinel process signal)))
+
+(defun 750words-region (start end)
+  "Post the current region to 750words.com.
+
+If run interactively with a region selected, it will post the
+content of the region.
+
+When called from LISP, pass START and END arguments to indicate
+the part of the buffer to post."
+  (interactive "r")
+  (let* ((fname (make-temp-file "750words")))
+    ;; Write the region to a temporary file
+    (write-region start end fname)
+    ;; Post the temporary file
+    (750words-file fname)))
 
 (defun 750words-buffer ()
   "Post the current buffer to 750words.com.
