@@ -108,8 +108,8 @@ login_form = WebDriverWait(driver, 10).until(
 )
 
 if login_form:
-    user_field = driver.find_element_by_id('person_email_address')
-    password_field = driver.find_element_by_id('person_password')
+    user_field = driver.find_element(By.ID, 'person_email_address')
+    password_field = driver.find_element(By.ID,'person_password')
     enter_text(driver, user_field, username)
     enter_text(driver, password_field, password)
     login_form.submit()
@@ -178,7 +178,7 @@ if text_field:
             # that the <div id="losing_words"> element is always there, but
             # normally empty, so we need to check if it contains any text
             # instead of its existence.
-            warning_dialog_text = driver.find_element_by_xpath('//div[@id="losing_words"]').text
+            warning_dialog_text = driver.find_element(By.XPATH, '//div[@id="losing_words"]').text
             if warning_dialog_text:
                 eprint("Got the reduced-word-count warning dialog, clicking 'Save anyway'")
                 # Press Enter to select the default button, which is "Save anyway"
